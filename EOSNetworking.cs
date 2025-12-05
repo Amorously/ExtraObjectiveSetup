@@ -1,6 +1,5 @@
 ﻿using ExtraObjectiveSetup.Utils;
 using GTFO.API;
-using System.Collections.Generic;
 
 namespace ExtraObjectiveSetup
 {
@@ -19,6 +18,12 @@ namespace ExtraObjectiveSetup
         private static HashSet<uint> foreverUsedIDs = new();
 
         private static HashSet<uint> usedIDs = new();
+
+        static EOSNetworking()
+        {
+            LevelAPI.OnBuildStart += Clear;
+            LevelAPI.OnLevelCleanup += Clear;
+        }
 
         public static uint AllotReplicatorID()
         {
@@ -68,12 +73,6 @@ namespace ExtraObjectiveSetup
         {
             foreverUsedIDs.Clear();
             currentForeverID = FOREVER_REPLICATOR_ID_START;
-        }
-
-        static EOSNetworking()
-        {
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
         }
     }
 }

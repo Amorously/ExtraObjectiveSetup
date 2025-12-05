@@ -1,18 +1,18 @@
-﻿using HarmonyLib;
-using Enemies;
-using SNetwork;
-using GameData;
-using ExtraObjectiveSetup.Utils;
+﻿using Enemies;
 using ExtraObjectiveSetup.Tweaks.Scout;
-using ExtraObjectiveSetup.Tweaks.BossEvents;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using HarmonyLib;
+using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches
 {
     [HarmonyPatch]
     class Patch_EventsOnZoneScoutScream
-    {
-        [HarmonyPrefix]
+    {        
         [HarmonyPatch(typeof(ES_ScoutScream), nameof(ES_ScoutScream.CommonUpdate))]
+        [HarmonyPrefix]
+        [HarmonyWrapSafe]
         private static bool Pre_ES_ScoutScream_CommonUpdate(ES_ScoutScream __instance)
         {
             var enemyAgent = __instance.m_enemyAgent;

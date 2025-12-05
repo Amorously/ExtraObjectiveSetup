@@ -2,8 +2,7 @@
 using ExtraObjectiveSetup.Utils;
 using GameData;
 using Player;
-using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Immutable;
 
 namespace ExtraObjectiveSetup.ExtendedWardenEvents
@@ -70,7 +69,7 @@ namespace ExtraObjectiveSetup.ExtendedWardenEvents
 
         public bool HasEventDefinition(uint eventID) => eventDefinition.ContainsKey(eventID);
 
-        private System.Collections.IEnumerator Handle(WardenObjectiveEventData e, float currentDuration)
+        private IEnumerator Handle(WardenObjectiveEventData e, float currentDuration)
         {
             uint eventID = (uint)e.Type;
             if (!eventDefinition.ContainsKey(eventID)) yield break;
@@ -104,12 +103,5 @@ namespace ExtraObjectiveSetup.ExtendedWardenEvents
 
             eventDefinition[eventID]?.Invoke(e);
         }
-
-        private EOSWardenEventManager() 
-        { 
-
-        }
-
-        static EOSWardenEventManager() { }
     }
 }

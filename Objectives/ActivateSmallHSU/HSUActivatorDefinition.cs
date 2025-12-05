@@ -1,10 +1,8 @@
-﻿using GameData;
-using System.Collections.Generic;
-using ExtraObjectiveSetup.Utils;
-using System.Text.Json.Serialization;
-using ChainedPuzzles;
+﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
-using System;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
 {
@@ -23,7 +21,7 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
         public uint ChainedPuzzleOnActivation { get; set; } = 0u;
 
         [JsonIgnore]
-        public ChainedPuzzleInstance ChainedPuzzleOnActivationInstance { get; set; } = null;
+        public ChainedPuzzleInstance ChainedPuzzleOnActivationInstance { get; set; } = null!;
 
         public Vec3 ChainedPuzzleStartPosition { get; set; } = new();
 

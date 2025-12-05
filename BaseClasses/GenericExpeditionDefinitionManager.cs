@@ -1,22 +1,15 @@
-﻿using System.IO;
-using GTFO.API.Utilities;
-using System.Collections.Generic;
-using MTFO.API;
+﻿using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.JSON;
+using GTFO.API.Utilities;
+using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
     public abstract class GenericExpeditionDefinitionManager<T> where T: new()
     {
         public uint CurrentMainLevelLayout => RundownManager.ActiveExpedition?.LevelLayoutData ?? 0;
-
         protected Dictionary<uint, GenericExpeditionDefinition<T>> definitions { get; set; } = new();
-
-        private readonly LiveEditListener liveEditListener;
-
         protected abstract string DEFINITION_NAME { get; }
-
         public string DEFINITION_PATH { get; private set; }
 
         protected virtual void AddDefinitions(GenericExpeditionDefinition<T> definitions)
@@ -41,7 +34,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             });
         }
 
-        public GenericExpeditionDefinition<T> GetDefinition(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout] : null;
+        public GenericExpeditionDefinition<T> GetDefinition(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout] : null!;
 
         public virtual void Init() { }
 
@@ -71,10 +64,8 @@ namespace ExtraObjectiveSetup.BaseClasses
                 AddDefinitions(conf);
             }
 
-            liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
+            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
         }
-
-        static GenericExpeditionDefinitionManager() { }
     }
 }

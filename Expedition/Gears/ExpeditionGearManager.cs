@@ -1,20 +1,15 @@
 ﻿using ExtraObjectiveSetup.Utils;
 using Gear;
 using Player;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace ExtraObjectiveSetup.Expedition.Gears
 {
     public class ExpeditionGearManager
     {
         public static ExpeditionGearManager Current { get; private set; } = new();
-
-        public GearManager VanillaGearManager { internal set; get; } = null; // setup in patch: GearManager.LoadOfflineGearDatas
-
+        public GearManager VanillaGearManager { internal set; get; } = null!; // setup in patch: GearManager.LoadOfflineGearDatas
         private Mode mode = Mode.DISALLOW;
-
         private HashSet<uint> GearIds = new();
 
         public readonly IList<(InventorySlot inventorySlot, Dictionary<uint, GearIDRange> loadedGears)> GearSlots = new List<(InventorySlot, Dictionary<uint, GearIDRange>)>() {
@@ -121,8 +116,6 @@ namespace ExtraObjectiveSetup.Expedition.Gears
 
         public void Init() { }
 
-        private ExpeditionGearManager() { }
-
         public static uint GetOfflineGearPID(GearIDRange gearIDRange)
         {
             string itemInstanceId = gearIDRange.PlayfabItemInstanceId;
@@ -143,8 +136,6 @@ namespace ExtraObjectiveSetup.Expedition.Gears
                 return 0;
             }
         }
-
-        static ExpeditionGearManager() { }
     }
 
 }

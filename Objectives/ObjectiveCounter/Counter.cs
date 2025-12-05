@@ -1,7 +1,6 @@
-﻿using ExtraObjectiveSetup.Utils;
-using FloLib.Networks.Replications;
+﻿using AmorLib.Networking.StateReplicators;
+using ExtraObjectiveSetup.Utils;
 using GTFO.API.Extensions;
-using SNetwork;
 
 namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 {
@@ -68,7 +67,7 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
             uint id = EOSNetworking.AllotReplicatorID();
             if(id == EOSNetworking.INVALID_ID) return false;
 
-            StateReplicator = StateReplicator<CounterStatus>.Create(id, new() { Count = def.StartingCount }, LifeTimeType.Level);
+            StateReplicator = StateReplicator<CounterStatus>.Create(id, new() { Count = def.StartingCount }, LifeTimeType.Session)!;
             StateReplicator.OnStateChanged += OnStateChanged;
             return true;
         }

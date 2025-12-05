@@ -7,12 +7,5 @@ namespace ExtraObjectiveSetup.Tweaks.TerminalPosition
         public static TerminalPositionOverrideManager Current = new();
 
         protected override string DEFINITION_NAME => "TerminalPosition";
-
-        private TerminalPositionOverrideManager() { }
-
-        static TerminalPositionOverrideManager()
-        {
-
-        }
     }
 }

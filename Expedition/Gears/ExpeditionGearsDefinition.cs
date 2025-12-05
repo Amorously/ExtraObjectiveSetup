@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ExtraObjectiveSetup.Expedition.Gears
+﻿namespace ExtraObjectiveSetup.Expedition.Gears
 {
     public enum Mode { ALLOW, DISALLOW }
 

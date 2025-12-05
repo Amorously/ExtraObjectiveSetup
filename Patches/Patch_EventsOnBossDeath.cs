@@ -1,12 +1,10 @@
-﻿using HarmonyLib;
-using Enemies;
-using LevelGeneration;
-using GameData;
-using AIGraph;
-using System.Collections.Generic;
-using GTFO.API;
-using ExtraObjectiveSetup.Utils;
+﻿using Enemies;
 using ExtraObjectiveSetup.Tweaks.BossEvents;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using GTFO.API;
+using HarmonyLib;
+using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Patches
 {
@@ -16,8 +14,10 @@ namespace ExtraObjectiveSetup.Patches
         private static HashSet<ushort> ExecutedForInstances = new(); 
 
         // called on both host and client side
-        [HarmonyPostfix]
+        
         [HarmonyPatch(typeof(EnemySync), nameof(EnemySync.OnSpawn))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_SpawnEnemy(EnemySync __instance, pEnemySpawnData spawnData) // 原生怪的mode == hibernate
         {
             if (!spawnData.courseNode.TryGet(out var node) || node == null)

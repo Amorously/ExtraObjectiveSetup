@@ -1,22 +1,18 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
-using LevelGeneration;
-using GameData;
-using UnityEngine;
-using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.Instances;
+﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.GeneratorCluster;
-using Il2cppStringList = Il2CppSystem.Collections.Generic.List<string>;
-using Localization;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
-using GTFO.API.Extensions;
+using ExtraObjectiveSetup.Utils;
+using HarmonyLib;
+using LevelGeneration;
+using UnityEngine;
+
 namespace ExtraObjectiveSetup.Patches.PowerGenerator
 {
     [HarmonyPatch]
     internal static class Patch_LG_PowerGeneratorCluster
-    {
-        [HarmonyPostfix]
+    {        
         [HarmonyPatch(typeof(LG_PowerGeneratorCluster), nameof(LG_PowerGeneratorCluster.Setup))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_PowerGeneratorCluster_Setup(LG_PowerGeneratorCluster __instance)
         {
             uint zoneInstanceIndex = GeneratorClusterInstanceManager.Current.Register(__instance);
@@ -24,13 +20,6 @@ namespace ExtraObjectiveSetup.Patches.PowerGenerator
             var globalZoneIndex = GeneratorClusterInstanceManager.Current.GetGlobalZoneIndex(__instance);
             var def = GeneratorClusterObjectiveManager.Current.GetDefinition(globalZoneIndex, zoneInstanceIndex);
             if (def == null) return;
-
-            //if (WardenObjectiveManager.Current.m_activeWardenObjectives[__instance.SpawnNode.LayerType].Type == eWardenObjectiveType.CentralGeneratorCluster)
-            //{
-            //    EOSLogger.Error("Found built Warden Objective LG_PowerGeneratorCluster but there's also a config for it! Won't apply this config");
-            //    EOSLogger.Error($"{globalZoneIndex}");
-            //    return;
-            //}
 
             EOSLogger.Debug("Found LG_PowerGeneratorCluster and its definition! Building this Generator cluster...");
 
@@ -40,25 +29,6 @@ namespace ExtraObjectiveSetup.Patches.PowerGenerator
             __instance.m_terminalItem = GOUtil.GetInterfaceFromComp<iTerminalItem>(__instance.m_terminalItemComp);
             __instance.m_terminalItem.Setup(__instance.m_itemKey);
             __instance.m_terminalItem.FloorItemStatus = eFloorInventoryObjectStatus.UnPowered;
-            //__instance.m_terminalItem.OnWantDetailedInfo = // crash
-            //    new System.Func<Il2cppStringList, Il2cppStringList>((defaultMsg) =>
-            //    {
-            //        var ans = new List<string>() {
-            //            "----------------------------------------------------------------",
-            //            Text.Get(2039482219),
-            //        };
-            //        foreach(var msg in defaultMsg)
-            //        {
-            //            ans.Add(msg);
-            //        }
-
-            //        ans.Add("");
-            //        ans.Add("");
-            //        ans.Add(Text.Get(3119507756));
-            //        ans.Add("----------------------------------------------------------------");
-
-            //        return ans.ToIl2Cpp();
-            //    });
             
             if (__instance.SpawnNode != null)
                 __instance.m_terminalItem.FloorItemLocation = __instance.SpawnNode.m_zone.NavInfo.GetFormattedText(LG_NavInfoFormat.Full_And_Number_With_Underscore);
@@ -79,37 +49,7 @@ namespace ExtraObjectiveSetup.Patches.PowerGenerator
                     PowerGeneratorInstanceManager.Current.MarkAsGCGenerator(__instance, generator);
                     generator.Setup();
                     generator.SetCanTakePowerCell(true);
-                    //generator.OnSyncStatusChanged += new System.Action<ePowerGeneratorStatus>(status =>
-                    //{
-                    //    Debug.Log("LG_PowerGeneratorCluster.powerGenerator.OnSyncStatusChanged! status: " + status);
-
-                    //    if (status != ePowerGeneratorStatus.Powered) return;
-
-                    //    uint poweredGenerators = 0u;
-
-                    //    for (int m = 0; m < __instance.m_generators.Length; ++m)
-                    //    {
-                    //        if (__instance.m_generators[m].m_stateReplicator.State.status == ePowerGeneratorStatus.Powered)
-                    //            poweredGenerators++;
-                    //    }
-
-                    //    EOSLogger.Log($"Generator Cluster PowerCell inserted ({poweredGenerators} / {__instance.m_generators.Count})");
-                    //    var EventsOnInsertCell = def.EventsOnInsertCell;
-
-                    //    int eventsIndex = (int)(poweredGenerators - 1);
-                    //    if (eventsIndex >= 0 && eventsIndex < EventsOnInsertCell.Count)
-                    //    {
-                    //        EOSLogger.Log($"Executing events ({poweredGenerators} / {__instance.m_generators.Count}). Event count: {EventsOnInsertCell[eventsIndex].Count}");
-                    //        EventsOnInsertCell[eventsIndex].ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
-                    //    }
-
-                    //    if (poweredGenerators == __instance.m_generators.Count && !__instance.m_endSequenceTriggered)
-                    //    {
-                    //        EOSLogger.Log("All generators powered, executing end sequence");
-                    //        __instance.StartCoroutine(__instance.ObjectiveEndSequence());
-                    //        __instance.m_endSequenceTriggered = true;
-                    //    }
-                    //});
+                    
                     Debug.Log("Spawning generator at alignIndex: " + k);
                     transformList.RemoveAt(k);
                 }

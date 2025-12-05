@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ExtraObjectiveSetup.BaseClasses
+﻿namespace ExtraObjectiveSetup.BaseClasses
 {
     public class GenericDefinition<T> where T : new()
     {

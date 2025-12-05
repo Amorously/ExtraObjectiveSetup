@@ -1,11 +1,9 @@
-﻿using GameData;
+﻿using ExtraObjectiveSetup.BaseClasses;
+using ExtraObjectiveSetup.Utils;
+using GameData;
 using GTFO.API;
 using LevelGeneration;
-using System;
-using System.Collections.Generic;
 using System.Text;
-using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.BaseClasses;
 
 namespace ExtraObjectiveSetup.Instances
 {
@@ -48,7 +46,7 @@ namespace ExtraObjectiveSetup.Instances
 
         public bool IsGCGenerator(LG_PowerGenerator_Core instance) => gcGenerators.ContainsKey(instance.Pointer);
 
-        public LG_PowerGeneratorCluster GetParentGeneratorCluster(LG_PowerGenerator_Core instance) => gcGenerators.TryGetValue(instance.Pointer, out var gc) ? gc : null;
+        public LG_PowerGeneratorCluster GetParentGeneratorCluster(LG_PowerGenerator_Core instance) => gcGenerators.TryGetValue(instance.Pointer, out var gc) ? gc : null!;
 
         private void OutputLevelInstanceInfo()
         {
@@ -85,11 +83,6 @@ namespace ExtraObjectiveSetup.Instances
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;
             LevelAPI.OnEnterLevel += OutputLevelInstanceInfo;
-        }
-
-        static PowerGeneratorInstanceManager()
-        {
-
         }
     }
 }

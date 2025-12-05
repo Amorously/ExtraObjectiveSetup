@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ExtraObjectiveSetup.Tweaks.TerminalTweak
+﻿namespace ExtraObjectiveSetup.Tweaks.TerminalTweak
 {
     public struct TerminalState
     {

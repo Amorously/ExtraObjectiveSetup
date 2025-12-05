@@ -1,8 +1,7 @@
-﻿using GameData;
-using System.Collections.Generic;
-using ExtraObjectiveSetup.BaseClasses;
-using System.Text.Json.Serialization;
+﻿using ExtraObjectiveSetup.BaseClasses;
+using GameData;
 using LevelGeneration;
+using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup
 {

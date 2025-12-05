@@ -1,5 +1,5 @@
-﻿using ExtraObjectiveSetup.Utils;
-using FloLib.Networks.Replications;
+﻿using AmorLib.Networking.StateReplicators;
+using ExtraObjectiveSetup.Utils;
 using LevelGeneration;
 using Player;
 using SNetwork;
@@ -71,18 +71,14 @@ namespace ExtraObjectiveSetup.Tweaks.TerminalTweak
 
         public static TerminalWrapper Instantiate(LG_ComputerTerminal lgTerminal, uint replicatorID)
         {
-            if (lgTerminal == null || replicatorID == EOSNetworking.INVALID_ID) return null;
+            if (lgTerminal == null || replicatorID == EOSNetworking.INVALID_ID) return null!;
             var t = new TerminalWrapper();
 
             t.lgTerminal = lgTerminal;
-            t.stateReplicator = StateReplicator<TerminalState>.Create(replicatorID, new() { Enabled = true }, LifeTimeType.Level);
+            t.stateReplicator = StateReplicator<TerminalState>.Create(replicatorID, new() { Enabled = true }, LifeTimeType.Session)!;
             t.stateReplicator.OnStateChanged += t.OnStateChanged;
 
             return t;
-        }
-
-        private TerminalWrapper()
-        {
         }
     }
 }

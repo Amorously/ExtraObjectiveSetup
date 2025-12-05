@@ -1,15 +1,12 @@
-﻿using ExtraObjectiveSetup.BaseClasses;
+﻿using ChainedPuzzles;
+using ExtraObjectiveSetup.BaseClasses;
+using ExtraObjectiveSetup.ExtendedWardenEvents;
+using ExtraObjectiveSetup.Tweaks.TerminalTweak;
 using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
-using System.Collections.Generic;
 using LevelGeneration;
-using System;
 using System.Collections.Immutable;
-using ChainedPuzzles;
-using Il2CppSystem.Runtime.Remoting.Messaging;
-using ExtraObjectiveSetup.ExtendedWardenEvents;
-using ExtraObjectiveSetup.Tweaks.TerminalTweak;
 
 namespace ExtraObjectiveSetup.Instances
 {
@@ -105,7 +102,7 @@ namespace ExtraObjectiveSetup.Instances
             Wrappers[terminal.Pointer] = t;
         }
 
-        public TerminalWrapper GetTerminalWrapper(LG_ComputerTerminal terminal) => Wrappers.ContainsKey(terminal.Pointer) ? Wrappers[terminal.Pointer] : null;
+        public TerminalWrapper GetTerminalWrapper(LG_ComputerTerminal terminal) => Wrappers.ContainsKey(terminal.Pointer) ? Wrappers[terminal.Pointer] : null!;
 
         private void Clear()
         {
@@ -137,9 +134,9 @@ namespace ExtraObjectiveSetup.Instances
             }
         }
 
-        public bool TryGetParentTerminal(ChainedPuzzleInstance cpInstance, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(cpInstance.Pointer, out terminal);
+        public bool TryGetParentTerminal(ChainedPuzzleInstance cpInstance, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(cpInstance.Pointer, out terminal!);
 
-        public bool TryGetParentTerminal(IntPtr pointer, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(pointer, out terminal);
+        public bool TryGetParentTerminal(IntPtr pointer, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(pointer, out terminal!);
 
         public void SetTerminalCommand(WardenObjectiveEventData e)
         {
@@ -196,7 +193,5 @@ namespace ExtraObjectiveSetup.Instances
             EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSSetTerminalCommand.ToString(), (uint)TerminalWardenEvents.EOSSetTerminalCommand, SetTerminalCommand);
             EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSToggleTerminalState.ToString(), (uint)TerminalWardenEvents.EOSToggleTerminalState, ToggleTerminalState);
         }
-    
-        static TerminalInstanceManager() { }
     }
 }

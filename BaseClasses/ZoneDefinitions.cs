@@ -1,6 +1,5 @@
 ﻿using GameData;
 using LevelGeneration;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.BaseClasses

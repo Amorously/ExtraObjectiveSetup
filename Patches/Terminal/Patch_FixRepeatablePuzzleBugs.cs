@@ -1,6 +1,4 @@
 ﻿using ChainedPuzzles;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Tweaks.TerminalTweak;
 using HarmonyLib;
 
 namespace ExtraObjectiveSetup.Patches.Terminal
@@ -9,20 +7,11 @@ namespace ExtraObjectiveSetup.Patches.Terminal
     internal static class Patch_FixRepeatablePuzzleBugs
     {
         // vanilla bug fix: CP_Cluster_Core.OnPuzzleDone is executed on checkpoint restore
-        [HarmonyPrefix]
         [HarmonyPatch(typeof(CP_Cluster_Core), nameof(CP_Cluster_Core.OnSyncStateChange))]
-        private static bool Pre_CheckEventsOnPuzzleSolved(CP_Cluster_Core __instance,
-            eClusterStatus newStatus, bool isDropinState)
+        [HarmonyPrefix]
+        [HarmonyWrapSafe]
+        private static bool Pre_CheckEventsOnPuzzleSolved(CP_Cluster_Core __instance, eClusterStatus newStatus, bool isDropinState)
         {
-            //if(!TerminalInstanceManager.Current.TryGetParentTerminal(__instance.m_owner.Pointer, out var terminal))
-            //{
-            //    return true;
-            //}
-
-            //var instanceIndex = TerminalInstanceManager.Current.GetZoneInstanceIndex(terminal);
-            //var def = TerminalTweakManager.Current.GetDefinition(TerminalInstanceManager.Current.GetGlobalZoneIndex(terminal), instanceIndex);
-            //if (def == null || !def.FixRepeatablePuzzleBugs) return true;
-
             pClusterState currentState = __instance.m_sync.GetCurrentState();
 
             // CP_Cluster_Core checkpoint restore fix

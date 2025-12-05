@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ExtraObjectiveSetup.Expedition.Gears;
+﻿using ExtraObjectiveSetup.Expedition.Gears;
 using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
 
 namespace ExtraObjectiveSetup.Expedition

@@ -9,9 +9,8 @@ namespace ExtraObjectiveSetup.Patches.ChainedPuzzle
 {
     [HarmonyPatch]
     internal static class ChainedPuzzleManager_CreatePuzzleInstance
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(ChainedPuzzleManager), nameof(ChainedPuzzleManager.CreatePuzzleInstance), new System.Type[] { 
+    {        
+        [HarmonyPatch(typeof(ChainedPuzzleManager), nameof(ChainedPuzzleManager.CreatePuzzleInstance), new Type[] { 
             typeof(ChainedPuzzleDataBlock),
             typeof(LG_Area),
             typeof(LG_Area),
@@ -19,6 +18,8 @@ namespace ExtraObjectiveSetup.Patches.ChainedPuzzle
             typeof(Transform),
             typeof(bool),
         })]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_ChainedPuzzleInstance_Setup(ChainedPuzzleInstance __result)
         {
             ChainedPuzzleInstanceManager.Current.Register(__result);

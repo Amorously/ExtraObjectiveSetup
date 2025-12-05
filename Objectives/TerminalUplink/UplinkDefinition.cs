@@ -2,7 +2,6 @@
 using ExtraObjectiveSetup.BaseClasses;
 using GameData;
 using LevelGeneration;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.Objectives.TerminalUplink
@@ -34,7 +33,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
         public UplinkTerminal BuildChainedPuzzleOn { get; set; } = UplinkTerminal.SENDER;
 
         [JsonIgnore]
-        public ChainedPuzzleInstance ChainedPuzzleToEndRoundInstance { get; set; } = null;
+        public ChainedPuzzleInstance ChainedPuzzleToEndRoundInstance { get; set; } = null!;
 
         public TimeSettings OverrideTimeSettings { get; set; } = new() {
             TimeToStartVerify = -1f,

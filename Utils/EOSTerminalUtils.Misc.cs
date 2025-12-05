@@ -1,7 +1,6 @@
-﻿using LevelGeneration;
-using GameData;
-using System.Collections.Generic;
-using System;
+﻿using GameData;
+using GTFO.API.Extensions;
+using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Utils
 {
@@ -23,13 +22,13 @@ namespace ExtraObjectiveSetup.Utils
             if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layerType, localIndex, out var zone) || zone == null)
             {
                 EOSLogger.Error($"SelectTerminal: Could NOT find zone {(dimensionIndex, layerType, localIndex)}");
-                return null;
+                return null!;
             }
 
             if (zone.TerminalsSpawnedInZone.Count <= 0)
             {
                 EOSLogger.Error($"SelectTerminal: Could not find any terminals in zone {(dimensionIndex, layerType, localIndex)}");
-                return null;
+                return null!;
             }
 
             List<LG_ComputerTerminal> result = new();
@@ -53,7 +52,7 @@ namespace ExtraObjectiveSetup.Utils
         {
             var localLogs = terminal.GetLocalLogs();
             logName = logName.ToUpperInvariant();
-            return localLogs.ContainsKey(logName) ? localLogs[logName] : null;
+            return localLogs.ContainsKey(logName) ? localLogs[logName] : null!;
         }
 
         public static void ResetInitialOutput(this LG_ComputerTerminal terminal)
@@ -85,7 +84,7 @@ namespace ExtraObjectiveSetup.Utils
             var terminalsInZone = terminal.SpawnNode.m_zone.TerminalsSpawnedInZone;
             int index = terminalsInZone.IndexOf(terminal);
 
-            ExpeditionZoneData zoneData = terminal.SpawnNode?.m_zone.m_settings.m_zoneData ?? null;
+            ExpeditionZoneData zoneData = terminal.SpawnNode?.m_zone.m_settings.m_zoneData ?? null!;
 
             if (zoneData == null)
             {

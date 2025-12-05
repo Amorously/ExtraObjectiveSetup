@@ -1,5 +1,4 @@
 ﻿using GameData;
-using System.Collections.Generic;
 
 namespace ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition
 {

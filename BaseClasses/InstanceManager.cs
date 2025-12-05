@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using ExtraObjectiveSetup.Utils;
 using GameData;
-using LevelGeneration;
-using ExtraObjectiveSetup.Utils;
 using GTFO.API;
+using LevelGeneration;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
@@ -23,8 +22,8 @@ namespace ExtraObjectiveSetup.BaseClasses
         {
             if (instance == null) return INVALID_INSTANCE_INDEX;
 
-            Dictionary<System.IntPtr, uint> instancesInZone = null;
-            List<T> instanceIndexInZone = null;
+            Dictionary<System.IntPtr, uint> instancesInZone = null!;
+            List<T> instanceIndexInZone = null!;
             if (!instances2Index.ContainsKey(globalZoneIndex))
             {
                 instancesInZone = new();
@@ -84,11 +83,11 @@ namespace ExtraObjectiveSetup.BaseClasses
         /// <returns></returns>
         public T GetInstance((eDimensionIndex dim, LG_LayerType layer, eLocalZoneIndex zone) globalZoneIndex, uint instanceIndex)
         {
-            if (!index2Instance.ContainsKey(globalZoneIndex)) return default;
+            if (!index2Instance.ContainsKey(globalZoneIndex)) return default!;
 
             var zoneInstanceIndices = index2Instance[globalZoneIndex];
 
-            return instanceIndex < zoneInstanceIndices.Count ? zoneInstanceIndices[(int)instanceIndex] : null;
+            return instanceIndex < zoneInstanceIndices.Count ? zoneInstanceIndices[(int)instanceIndex] : null!;
         }
 
         public T GetInstance(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex) => GetInstance((dimensionIndex, layerType, localIndex), instanceIndex);

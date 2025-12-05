@@ -1,19 +1,20 @@
-﻿using HarmonyLib;
-using LevelGeneration;
+﻿using ExtraObjectiveSetup.Instances;
+using ExtraObjectiveSetup.Objectives.IndividualGenerator;
 using ExtraObjectiveSetup.Utils;
 using GameData;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Objectives.IndividualGenerator;
-using SNetwork;
+using HarmonyLib;
+using LevelGeneration;
 using Player;
+using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.PowerGenerator
 {
     [HarmonyPatch]
     internal static class Patch_LG_PowerGenerator_Core_Setup
     {
-        [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_PowerGenerator_Core), nameof(LG_PowerGenerator_Core.Setup))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_PowerGenerator_Setup(LG_PowerGenerator_Core __instance)
         {
             // do some minor vanilla bug fix
@@ -57,21 +58,12 @@ namespace ExtraObjectiveSetup.Patches.PowerGenerator
                 __instance.SetCanTakePowerCell(true);
             }
 
-            //if (def.EventsOnInsertCell?.Count > 0)
-            //{
-            //    __instance.OnSyncStatusChanged += new System.Action<ePowerGeneratorStatus>((status) => {
-            //        if (status == ePowerGeneratorStatus.Powered)
-            //        {
-            //            def.EventsOnInsertCell.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
-            //        }
-            //    });
-            //}
-
             EOSLogger.Debug($"LG_PowerGenerator_Core: overriden, instance {zoneInstanceIndex} in {globalZoneIndex}");
         }
-
-        [HarmonyPostfix]
+        
         [HarmonyPatch(typeof(LG_PowerGenerator_Core), nameof(LG_PowerGenerator_Core.SyncStatusChanged))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_SyncStatusChanged(LG_PowerGenerator_Core __instance, pPowerGeneratorState state, bool isDropinState)
         {
             var zoneInstanceIndex = PowerGeneratorInstanceManager.Current.GetZoneInstanceIndex(__instance);

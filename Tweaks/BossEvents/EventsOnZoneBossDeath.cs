@@ -1,7 +1,5 @@
-﻿using FloLib.Networks.Replications;
+﻿using AmorLib.Networking.StateReplicators;
 using GameData;
-using InControl.NativeProfile;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.Tweaks.BossEvents
@@ -42,7 +40,7 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
         public List<WardenObjectiveEventData> EventsOnBossDeath { set; get; } = new();
 
         [JsonIgnore]
-        public StateReplicator<FiniteBDEState> FiniteBDEStateReplicator { get; private set; } = null;
+        public StateReplicator<FiniteBDEState> FiniteBDEStateReplicator { get; private set; } = null!;
     
         public void SetupReplicator(uint replicatorID)
         {
@@ -51,7 +49,7 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
                 return; // state replicator is not required
             }
 
-            FiniteBDEStateReplicator = StateReplicator<FiniteBDEState>.Create(replicatorID, new() { ApplyToHibernateCount = ApplyToHibernateCount, ApplyToWaveCount = ApplyToWaveCount }, LifeTimeType.Level);
+            FiniteBDEStateReplicator = StateReplicator<FiniteBDEState>.Create(replicatorID, new() { ApplyToHibernateCount = ApplyToHibernateCount, ApplyToWaveCount = ApplyToWaveCount }, LifeTimeType.Session)!;
             FiniteBDEStateReplicator.OnStateChanged += OnStateChanged;
         }
 
@@ -62,7 +60,7 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
 
         internal void Destroy()
         {
-            FiniteBDEStateReplicator = null;
+            FiniteBDEStateReplicator = null!;
         }
 
         [JsonIgnore]

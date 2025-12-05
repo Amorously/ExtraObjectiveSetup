@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using GTFO.API.Utilities;
-using System.Collections.Generic;
-using MTFO.API;
+﻿using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Utils;
-using LevelGeneration;
 using GameData;
-using ExtraObjectiveSetup.JSON;
+using GTFO.API.Utilities;
+using LevelGeneration;
+using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
@@ -27,12 +24,6 @@ namespace ExtraObjectiveSetup.BaseClasses
         /// Subclasses should not modify its contents, except properies with [JsonIgnore] attribute.
         /// </summary>
         protected Dictionary<uint, InstanceDefinitionsForLevel<T>> definitions = new();
-
-        /// <summary>
-        /// LiveEditListener to enable live edit for this definition.
-        /// Subclasses may add additional operations upon live-edit events via this listener.
-        /// </summary>
-        protected readonly LiveEditListener liveEditListener;
 
         /// <summary>
         /// The name of definition to hold. This defines the definition file path from which to fetch, live-edit definition data. 
@@ -102,10 +93,10 @@ namespace ExtraObjectiveSetup.BaseClasses
 
         public virtual T GetDefinition(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex)
         {
-            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return null;
+            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return null!;
 
             return definitions[RundownManager.ActiveExpedition.LevelLayoutData]
-                .Definitions.Find(def => def.DimensionIndex == dimensionIndex && def.LayerType == layerType && def.LocalIndex == localIndex && def.InstanceIndex == instanceIndex);
+                .Definitions.Find(def => def.DimensionIndex == dimensionIndex && def.LayerType == layerType && def.LocalIndex == localIndex && def.InstanceIndex == instanceIndex)!;
         }
 
         /// <summary>
@@ -140,10 +131,8 @@ namespace ExtraObjectiveSetup.BaseClasses
                 AddDefinitions(conf);
             }
 
-            liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
+            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
         }
-
-        static InstanceDefinitionManager() { }
     }
 }

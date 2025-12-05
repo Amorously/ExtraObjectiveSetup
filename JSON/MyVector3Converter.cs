@@ -1,10 +1,9 @@
-﻿using GTFO.API.Utilities;
-using System;
+﻿using ExtraObjectiveSetup.Utils;
+using GTFO.API.Utilities;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using UnityEngine;
-using ExtraObjectiveSetup.Utils;
 
 namespace ExtraObjectiveSetup.JSON
 {

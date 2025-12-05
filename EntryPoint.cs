@@ -1,44 +1,36 @@
-﻿using BepInEx;
+﻿using AmorLib.Dependencies;
+using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
-using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Expedition;
 using ExtraObjectiveSetup.Expedition.Gears;
 using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
-using ExtraObjectiveSetup.JSON.MTFOPartialData;
+using HarmonyLib;
 
 namespace ExtraObjectiveSetup
 {
-    [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency(MTFOUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency(MTFOPartialDataUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(InjectLibUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInPlugin(AUTHOR + "." + PLUGIN_NAME, PLUGIN_NAME, VERSION)]
-    
-    public class EntryPoint: BasePlugin
+    [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.dak.MTFO", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("Amor.AmorLib", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(InjectLib_Wrapper.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(PData_Wrapper.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
+     public sealed class EntryPoint: BasePlugin
     {
         public const string AUTHOR = "Inas";
         public const string PLUGIN_NAME = "ExtraObjectiveSetup";
-        public const string VERSION = "1.6.10";
-
-        private Harmony m_Harmony;
+        public const string VERSION = "1.7.0";
         
         public override void Load()
         {
-            m_Harmony = new Harmony("ExtraObjectiveSetup");
-            m_Harmony.PatchAll();
-
+            new Harmony("ExtraObjectiveSetup").PatchAll();
             SetupManagers();
         }
 
         /// <summary>
         /// Explicitly invoke Init() to all managers to eager-load, which in the meantime defines chained puzzle creation order if any
         /// </summary>
-        private void SetupManagers()
+        private static void SetupManagers()
         {
-            BatchBuildManager.Current.Init();
-
             Objectives.IndividualGenerator.IndividualGeneratorObjectiveManager.Current.Init();
             Objectives.GeneratorCluster.GeneratorClusterObjectiveManager.Current.Init();
             Objectives.ActivateSmallHSU.HSUActivatorObjectiveManager.Current.Init();

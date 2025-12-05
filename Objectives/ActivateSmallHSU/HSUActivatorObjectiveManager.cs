@@ -1,14 +1,12 @@
-﻿using GTFO.API;
-using ExtraObjectiveSetup.Utils;
-using ChainedPuzzles;
-using GameData;
-using UnityEngine;
-using ExtraObjectiveSetup.Instances;
+﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
-using System.Collections.Generic;
-using System;
+using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using GTFO.API;
 using GTFO.API.Extensions;
+using UnityEngine;
 
 namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
 {
@@ -125,17 +123,13 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
             //definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(def => { def.ChainedPuzzleOnActivationInstance = null; });
             foreach(var h in m_HSUActivatorPuzzles.Values)
             {
-                h.ChainedPuzzleOnActivationInstance = null;
+                h.ChainedPuzzleOnActivationInstance = null!;
             }
 
             m_HSUActivatorPuzzles.Clear();
         }
 
-        internal HSUActivatorDefinition GetHSUActivatorDefinition(ChainedPuzzleInstance chainedPuzzle) => m_HSUActivatorPuzzles.TryGetValue(chainedPuzzle.Pointer, out var def) ? def : null;
-
-        static HSUActivatorObjectiveManager()
-        {
-        }
+        internal HSUActivatorDefinition GetHSUActivatorDefinition(ChainedPuzzleInstance chainedPuzzle) => m_HSUActivatorPuzzles.TryGetValue(chainedPuzzle.Pointer, out var def) ? def : null!;
 
         private HSUActivatorObjectiveManager() : base()
         {

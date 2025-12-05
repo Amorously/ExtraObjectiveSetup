@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using GTFO.API;
-using GameData;
-using ChainedPuzzles;
-using ExtraObjectiveSetup.Utils;
+﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using GTFO.API;
 using GTFO.API.Extensions;
 
 namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
@@ -77,11 +76,6 @@ namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
             LevelAPI.OnBuildDone += OnBuildDone;
             LevelAPI.OnLevelCleanup += OnLevelCleanup;
             LevelAPI.OnBuildStart += OnLevelCleanup;
-        }
-
-        static GeneratorClusterObjectiveManager()
-        {
-
         }
     }
 }

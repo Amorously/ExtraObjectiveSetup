@@ -5,11 +5,13 @@ using HarmonyLib;
 namespace ExtraObjectiveSetup.Patches.Expedition
 {
     [HarmonyPatch]
-    internal class GearManager_LoadOfflineGearDatas
+    internal static class GearManager_LoadOfflineGearDatas
     {
         // called on both host and client side
-        [HarmonyPostfix]
+        
         [HarmonyPatch(typeof(GearManager), nameof(GearManager.LoadOfflineGearDatas))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_GearManager_LoadOfflineGearDatas(GearManager __instance)
         {
             ExpeditionGearManager.Current.VanillaGearManager = __instance;

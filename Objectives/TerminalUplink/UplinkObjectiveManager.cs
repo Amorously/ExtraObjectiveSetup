@@ -1,18 +1,15 @@
-﻿using GTFO.API;
-using ExtraObjectiveSetup.Utils;
-using System.Collections.Generic;
-using LevelGeneration;
+﻿using AmorLib.Networking.StateReplicators;
 using ChainedPuzzles;
-using GameData;
-using Localization;
-using System;
-using GTFO.API.Extensions;
-using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.BaseClasses;
-using FloLib.Networks.Replications;
+using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
+using ExtraObjectiveSetup.Utils;
+using GameData;
+using GTFO.API;
+using GTFO.API.Extensions;
+using LevelGeneration;
+using Localization;
 using SNetwork;
-using UnityEngine;
 
 namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 {
@@ -20,7 +17,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
     {
         public static UplinkObjectiveManager Current { get; private set; } = new();
 
-        private TextDataBlock UplinkAddrLogContentBlock = null;
+        private TextDataBlock UplinkAddrLogContentBlock = null!;
 
         private Dictionary<IntPtr, StateReplicator<UplinkState>> stateReplicators = new();
 
@@ -96,7 +93,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 
             if (def.UseUplinkAddress)
             {
-                LG_ComputerTerminal addressLogTerminal = null;
+                LG_ComputerTerminal addressLogTerminal = null!;
 
                 EOSLogger.Debug($"BuildUplinkOverride: UseUplinkAddress");
                 addressLogTerminal = TerminalInstanceManager.Current.GetInstance(def.UplinkAddressLogPosition.DimensionIndex, def.UplinkAddressLogPosition.LayerType, def.UplinkAddressLogPosition.LocalIndex, def.UplinkAddressLogPosition.InstanceIndex);
@@ -179,7 +176,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                     var block = GameDataBlockBase<ChainedPuzzleDataBlock>.GetBlock(roundOverride.ChainedPuzzleToEndRound);
                     if(block != null)
                     {
-                        LG_ComputerTerminal t = null;
+                        LG_ComputerTerminal t = null!;
                         switch (roundOverride.BuildChainedPuzzleOn)
                         {
                             case UplinkTerminal.SENDER: t = uplinkTerminal; break;
@@ -256,7 +253,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                 return;
             }
 
-            var replicator = StateReplicator<UplinkState>.Create(replicatorID, new() { Status = UplinkStatus.Unfinished }, LifeTimeType.Level);
+            var replicator = StateReplicator<UplinkState>.Create(replicatorID, new() { Status = UplinkStatus.Unfinished }, LifeTimeType.Session);
             replicator.OnStateChanged += (oldState, newState, isRecall) =>
             {
                 if (oldState.Status == newState.Status) return;
@@ -314,19 +311,9 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 
         private void Clear()
         {
-            //if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
-            //definitions[RundownManager.ActiveExpedition.LevelLayoutData]
-            //    .Definitions
-            //    .ForEach((def) => def.RoundOverrides.ForEach(r => r.ChainedPuzzleToEndRoundInstance = null));
-
-            builtRoundPuzzles.ForEach(r => { r.ChainedPuzzleToEndRoundInstance = null; });
+            builtRoundPuzzles.ForEach(r => { r.ChainedPuzzleToEndRoundInstance = null!; } );
             builtRoundPuzzles.Clear();
             stateReplicators.Clear();
-        }
-
-        static UplinkObjectiveManager()
-        {
-
         }
 
         private UplinkObjectiveManager() : base() 

@@ -5,16 +5,6 @@ namespace ExtraObjectiveSetup.Utils
 {
     public static class EOSUtils
     {
-        public static System.Collections.Generic.List<T> ToManaged<T>(this Il2CppSystem.Collections.Generic.List<T> il2cppList)
-        {
-            System.Collections.Generic.List<T> ret = new();
-            foreach (var e in il2cppList)
-            {
-                ret.Add(e);
-            }
-            return ret;
-        }
-
         public static void ResetProgress(this ChainedPuzzleInstance chainedPuzzle)
         {
             void ResetChild(iChainedPuzzleCore ICore)

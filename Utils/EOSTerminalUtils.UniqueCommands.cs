@@ -1,9 +1,8 @@
 ﻿using ChainedPuzzles;
-using LevelGeneration;
 using ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition;
 using GameData;
 using GTFO.API.Extensions;
-using Localization;
+using LevelGeneration;
 using UnityEngine;
 
 namespace ExtraObjectiveSetup.Utils
@@ -42,8 +41,8 @@ namespace ExtraObjectiveSetup.Utils
                         }
                         else
                         {
-                            sourceArea = terminal.ConnectedReactor?.SpawnNode?.m_area ?? null;
-                            transform = terminal.ConnectedReactor?.m_chainedPuzzleAlign ?? null;
+                            sourceArea = terminal.ConnectedReactor?.SpawnNode?.m_area ?? null!;
+                            transform = terminal.ConnectedReactor?.m_chainedPuzzleAlign ?? null!;
                         }
 
                         if (sourceArea == null)

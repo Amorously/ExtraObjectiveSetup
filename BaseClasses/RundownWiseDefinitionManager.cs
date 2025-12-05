@@ -1,9 +1,7 @@
-﻿using System.IO;
-using GTFO.API.Utilities;
-using System.Collections.Generic;
-using MTFO.API;
+﻿using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.JSON;
+using GTFO.API.Utilities;
+using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
@@ -14,11 +12,7 @@ namespace ExtraObjectiveSetup.BaseClasses
         public const int APPLY_TO_ALL_RUNDOWN_ID = 0;
 
         protected Dictionary<int, RundownWiseDefinition<T>> definitions { get; set; } = new();
-
-        private readonly LiveEditListener liveEditListener;
-
         protected abstract string DEFINITION_NAME { get; }
-
         public string DEFINITION_PATH { get; private set; }
 
         protected virtual void AddDefinitions(RundownWiseDefinition<T> definitions)
@@ -43,7 +37,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             });
         }
 
-        public RundownWiseDefinition<T> GetDefinition(uint RundownID) => definitions.TryGetValue((int)RundownID, out var def) ? def : null; 
+        public RundownWiseDefinition<T> GetDefinition(uint RundownID) => definitions.TryGetValue((int)RundownID, out var def) ? def : null!; 
 
         public virtual void Init() { }
 
@@ -73,10 +67,8 @@ namespace ExtraObjectiveSetup.BaseClasses
                 AddDefinitions(conf);
             }
 
-            liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
+            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
         }
-
-        static RundownWiseDefinitionManager() { }
     }
 }

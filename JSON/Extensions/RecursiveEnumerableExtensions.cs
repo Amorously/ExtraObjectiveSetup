@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ExtraObjectiveSetup.JSON.Extensions
+﻿namespace ExtraObjectiveSetup.JSON.Extensions
 {
     public static partial class RecursiveEnumerableExtensions
     {

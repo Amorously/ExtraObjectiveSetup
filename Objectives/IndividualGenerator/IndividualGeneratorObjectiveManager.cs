@@ -9,7 +9,5 @@ namespace ExtraObjectiveSetup.Objectives.IndividualGenerator
         protected override string DEFINITION_NAME { get; } = "IndividualGenerator";
 
         private IndividualGeneratorObjectiveManager() : base() { }
-
-        static IndividualGeneratorObjectiveManager() { }
     }
 }

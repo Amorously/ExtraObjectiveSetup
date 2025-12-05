@@ -1,6 +1,5 @@
-﻿using GameData;
-using System.Collections.Generic;
-using ExtraObjectiveSetup.BaseClasses;
+﻿using ExtraObjectiveSetup.BaseClasses;
+using GameData;
 
 namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
 {

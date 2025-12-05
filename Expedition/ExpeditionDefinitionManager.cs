@@ -1,23 +1,15 @@
-﻿using System.IO;
-using GTFO.API.Utilities;
-using System.Collections.Generic;
-using MTFO.API;
+﻿using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.JSON;
-using GTFO.API;
+using GTFO.API.Utilities;
+using MTFO.API;
 
 namespace ExtraObjectiveSetup.Expedition
 {
     public sealed class ExpeditionDefinitionManager
     {
         public static ExpeditionDefinitionManager Current { get; private set; } = new();
-
         public uint CurrentMainLevelLayout => RundownManager.ActiveExpedition.LevelLayoutData;
-
         private Dictionary<uint, ExpeditionDefinition> definitions = new();
-
-        private readonly LiveEditListener liveEditListener;
-
         public const string DEFINITION_NAME = "ExtraExpeditionSettings";
 
         public string DEFINITION_PATH { get; private set; } = Path.Combine(MTFOPathAPI.CustomPath, "ExtraObjectiveSetup", DEFINITION_NAME);
@@ -44,7 +36,7 @@ namespace ExtraObjectiveSetup.Expedition
             });
         }
 
-        public ExpeditionDefinition GetDefinition(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout] : null;
+        public ExpeditionDefinition GetDefinition(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout] : null!;
 
         public void Init() { }
 
@@ -73,10 +65,8 @@ namespace ExtraObjectiveSetup.Expedition
                 AddDefinitions(conf);
             }
 
-            liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
+            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
         }
-
-        static ExpeditionDefinitionManager() { }
     }
 }

@@ -1,9 +1,7 @@
-﻿using LevelGeneration;
+﻿using ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition;
 using GameData;
+using LevelGeneration;
 using Localization;
-using System.Collections.Generic;
-using ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition;
-using System;
 
 namespace ExtraObjectiveSetup.Utils
 {
@@ -14,14 +12,14 @@ namespace ExtraObjectiveSetup.Utils
             if (seedType == eSeedType.None)
             {
                 EOSLogger.Error($"SelectTerminal: unsupported seed type {seedType}");
-                return null;
+                return null!;
             }
 
             var candidateTerminals = FindTerminal(dimensionIndex, layerType, localIndex, (x => !x.HasPasswordPart));
             if(candidateTerminals == null)
             {
                 EOSLogger.Error($"SelectTerminal: Could not find zone {(dimensionIndex, layerType, localIndex)}!");
-                return null;
+                return null!;
             }
 
             if (candidateTerminals.Count <= 0)
@@ -42,13 +40,13 @@ namespace ExtraObjectiveSetup.Utils
                     return candidateTerminals[UnityEngine.Random.Range(0, candidateTerminals.Count)];
                 default:
                     EOSLogger.Error("SelectTerminal: did not have a valid SeedType!!");
-                    return null;
+                    return null!;
             }
         }
 
         public static void BuildPassword(LG_ComputerTerminal terminal, TerminalPasswordData data)
         {
-            if (!data.PasswordProtected) return;
+            if (terminal == null || data == null || !data.PasswordProtected) return;
 
             if(terminal.IsPasswordProtected)
             {
@@ -109,13 +107,13 @@ namespace ExtraObjectiveSetup.Utils
                     if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(selectedData.DimensionIndex, selectedData.LayerType, selectedData.LocalIndex, out var passwordZone) || passwordZone == null)
                     {
                         EOSLogger.Error($"BuildPassword: seedType {eSeedType.None} specified but cannot find zone {selectedData.GlobalZoneIndexTuple()}");
-                        //continue; // fallback to critical error output
+                        continue; // fallback to critical error output
                     }
 
                     if (passwordZone.TerminalsSpawnedInZone.Count <= 0)
                     {
                         EOSLogger.Error($"BuildPassword: seedType {eSeedType.None} specified but cannot find terminal zone {selectedData.GlobalZoneIndexTuple()}");
-                        //continue; // fallback to critical error output
+                        continue; // fallback to critical error output
                     }
 
                     passwordTerminal = passwordZone.TerminalsSpawnedInZone[selectedData.TerminalIndex];

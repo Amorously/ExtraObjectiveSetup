@@ -1,28 +1,28 @@
-﻿using HarmonyLib;
-using LevelGeneration;
+﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
+using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
+using ExtraObjectiveSetup.Instances;
+using ExtraObjectiveSetup.Objectives.GeneratorCluster;
+using ExtraObjectiveSetup.Objectives.IndividualGenerator;
 using ExtraObjectiveSetup.Utils;
 using GameData;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Objectives.IndividualGenerator;
-using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
-using ExtraObjectiveSetup.Objectives.GeneratorCluster;
+using HarmonyLib;
+using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Patches.PowerGenerator
 {
     [HarmonyPatch]
     internal static class Patch_LG_PowerGenerator_Core_SyncStatusChanged
-    {
-        [HarmonyPostfix]
+    {        
         [HarmonyPatch(typeof(LG_PowerGenerator_Core), nameof(LG_PowerGenerator_Core.SyncStatusChanged))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_SyncStatusChanged(LG_PowerGenerator_Core __instance, pPowerGeneratorState state, bool isDropinState)
         {
-
             var zoneInstanceIndex = PowerGeneratorInstanceManager.Current.GetZoneInstanceIndex(__instance);
             var globalZoneIndex = PowerGeneratorInstanceManager.Current.GetGlobalZoneIndex(__instance);
 
             var gcParent = PowerGeneratorInstanceManager.Current.GetParentGeneratorCluster(__instance);
-            GeneratorClusterDefinition gcDef = null;
+            GeneratorClusterDefinition gcDef = null!;
             if(gcParent != null)
             {
                 uint gcZoneInstanceIndex = GeneratorClusterInstanceManager.Current.GetZoneInstanceIndex(gcParent);

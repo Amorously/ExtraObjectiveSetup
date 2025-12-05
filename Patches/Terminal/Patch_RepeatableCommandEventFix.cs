@@ -1,17 +1,16 @@
 ﻿using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Tweaks.TerminalTweak;
 using ExtraObjectiveSetup.Utils;
 using HarmonyLib;
 using LevelGeneration;
-
 
 namespace ExtraObjectiveSetup.Patches.Terminal
 {
     [HarmonyPatch]
     internal static class Patch_RepeatableCommandEventFix
-    {
-        [HarmonyPostfix]
+    {        
         [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.SetupCommandEvents))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_ResetRepeatableUniqueCommandChainedPuzzle(LG_ComputerTerminalCommandInterpreter __instance)
         {
             var terminal = __instance.m_terminal;
@@ -36,7 +35,7 @@ namespace ExtraObjectiveSetup.Patches.Terminal
 
                     if (__instance.m_terminal.TryGetChainPuzzleForCommand(CMD, i, out var cpInstance) && cpInstance != null)
                     {
-                        cpInstance.OnPuzzleSolved += new System.Action(cpInstance.ResetProgress);
+                        cpInstance.OnPuzzleSolved += new Action(cpInstance.ResetProgress);
                     }
 
                     EOSLogger.Debug($"TerminalTweak: {terminal.ItemKey}, command {cmdName} set to be repeatable!");

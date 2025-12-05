@@ -3,7 +3,6 @@ using ExtraObjectiveSetup.ExtendedWardenEvents;
 using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
-using System.Collections.Generic;
 
 
 namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
@@ -79,10 +78,7 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;
             LevelAPI.OnBuildDone += BuildCounters;
-            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);
-                        
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);               
         }
-
-        static ObjectiveCounterManager() { }
     }
 }

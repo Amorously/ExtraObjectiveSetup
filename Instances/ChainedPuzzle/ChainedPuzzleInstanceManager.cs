@@ -4,8 +4,6 @@ using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
 using LevelGeneration;
-using System;
-using System.Collections.Generic;
 using pCPState = ChainedPuzzles.pChainedPuzzleState;
 
 namespace ExtraObjectiveSetup.Instances.ChainedPuzzle
@@ -27,7 +25,7 @@ namespace ExtraObjectiveSetup.Instances.ChainedPuzzle
             uint instanceIndex = base.Register(globalZoneIndex, instance);
             if (instanceIndex != INVALID_INSTANCE_INDEX)
             {
-                Puzzles_OnStateChange[instance.Pointer] = null;
+                Puzzles_OnStateChange[instance.Pointer] = null!;
             }
 
             return instanceIndex;

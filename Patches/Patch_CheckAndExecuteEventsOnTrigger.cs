@@ -15,6 +15,7 @@ namespace ExtraObjectiveSetup.Patches
             typeof(bool),
             typeof(float)
         })]
+        [HarmonyWrapSafe]
         private static bool Pre_CheckAndExecuteEventsOnTrigger(WardenObjectiveEventData eventToTrigger,
             eWardenObjectiveEventTrigger trigger,
             bool ignoreTrigger,

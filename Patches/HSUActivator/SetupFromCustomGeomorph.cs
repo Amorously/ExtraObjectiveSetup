@@ -1,20 +1,19 @@
-﻿using HarmonyLib;
-using LevelGeneration;
-using ExtraObjectiveSetup.Utils;
-using GameData;
-using SNetwork;
-using Player;
+﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.ActivateSmallHSU;
-using ExtraObjectiveSetup.Instances;
-using System;
+using ExtraObjectiveSetup.Utils;
+using HarmonyLib;
+using LevelGeneration;
+using Player;
+using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.HSUActivator
 {
     [HarmonyPatch]
-    internal class SetupFromCustomGeomorph
+    internal static class SetupFromCustomGeomorph
     {
-        [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_HSUActivator_Core), nameof(LG_HSUActivator_Core.SetupFromCustomGeomorph))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_LG_HSUActivator_Core_SetupFromCustomGeomorph(LG_HSUActivator_Core __instance)
         {
             uint instanceIndex = HSUActivatorInstanceManager.Current.Register(__instance);

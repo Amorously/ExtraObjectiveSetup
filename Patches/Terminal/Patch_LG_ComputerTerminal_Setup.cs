@@ -8,9 +8,10 @@ namespace ExtraObjectiveSetup.Patches.Terminal
 {
     [HarmonyPatch]
     internal static class Patch_LG_ComputerTerminal_Setup
-    {
-        [HarmonyPostfix]
+    {        
         [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
         private static void Post_LG_ComputerTerminal_Setup(LG_ComputerTerminal __instance)
         {
             uint instanceIndex = TerminalInstanceManager.Current.Register(__instance);
