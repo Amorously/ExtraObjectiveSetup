@@ -1,26 +1,19 @@
-﻿using GameData;
+﻿using AmorLib.Utils;
+using GameData;
 using LevelGeneration;
 using System.Text.Json.Serialization;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
-    public class GlobalZoneIndex 
+    public class GlobalBased : GlobalBase
     {
-        [JsonPropertyOrder(-10)] // prioritize base class property
-        public eDimensionIndex DimensionIndex { get; set; }
-
         [JsonPropertyOrder(-10)]
-        public LG_LayerType LayerType { get; set; }
-
-        [JsonPropertyOrder(-10)]
-        public eLocalZoneIndex LocalIndex { get; set; }
+        public LG_LayerType LayerType { get => Layer; private set => Layer = value; } // name consistency
 
         public (eDimensionIndex, LG_LayerType, eLocalZoneIndex) GlobalZoneIndexTuple() => (DimensionIndex, LayerType, LocalIndex);
-    
-        public override string ToString() => $"{GlobalZoneIndexTuple}";
     }
 
-    public class ZoneDefinitionsForLevel<T> where T : GlobalZoneIndex, new()
+    public class ZoneDefinitionsForLevel<T> where T : GlobalBased, new()
     {
         public uint MainLevelLayout { set; get; } = 0;
 

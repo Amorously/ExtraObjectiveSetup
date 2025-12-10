@@ -1,6 +1,5 @@
 ﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.ActivateSmallHSU;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using HarmonyLib;
 using LevelGeneration;
@@ -8,10 +7,9 @@ using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.HSUActivator
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_HSUActivator_Core), nameof(LG_HSUActivator_Core.SyncStatusChanged))]
     internal static class SyncStatusChanged
     {        
-        [HarmonyPatch(typeof(LG_HSUActivator_Core), nameof(LG_HSUActivator_Core.SyncStatusChanged))]
         [HarmonyPrefix]
         [HarmonyWrapSafe]
         private static bool Pre_LG_HSUActivator_Core_SyncStatusChanged(LG_HSUActivator_Core __instance, pHSUActivatorState newState, bool isRecall)

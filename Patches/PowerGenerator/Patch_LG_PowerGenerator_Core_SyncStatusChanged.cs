@@ -3,17 +3,15 @@ using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
 using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.GeneratorCluster;
 using ExtraObjectiveSetup.Objectives.IndividualGenerator;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using HarmonyLib;
 using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Patches.PowerGenerator
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_PowerGenerator_Core), nameof(LG_PowerGenerator_Core.SyncStatusChanged))]
     internal static class Patch_LG_PowerGenerator_Core_SyncStatusChanged
     {        
-        [HarmonyPatch(typeof(LG_PowerGenerator_Core), nameof(LG_PowerGenerator_Core.SyncStatusChanged))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_SyncStatusChanged(LG_PowerGenerator_Core __instance, pPowerGeneratorState state, bool isDropinState)

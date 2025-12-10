@@ -3,11 +3,10 @@ using HarmonyLib;
 
 namespace ExtraObjectiveSetup.Patches.Terminal
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(CP_Cluster_Core), nameof(CP_Cluster_Core.OnSyncStateChange))]
     internal static class Patch_FixRepeatablePuzzleBugs
     {
         // vanilla bug fix: CP_Cluster_Core.OnPuzzleDone is executed on checkpoint restore
-        [HarmonyPatch(typeof(CP_Cluster_Core), nameof(CP_Cluster_Core.OnSyncStateChange))]
         [HarmonyPrefix]
         [HarmonyWrapSafe]
         private static bool Pre_CheckEventsOnPuzzleSolved(CP_Cluster_Core __instance, eClusterStatus newStatus, bool isDropinState)

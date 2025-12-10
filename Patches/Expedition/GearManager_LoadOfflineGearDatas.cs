@@ -4,12 +4,11 @@ using HarmonyLib;
 
 namespace ExtraObjectiveSetup.Patches.Expedition
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(GearManager), nameof(GearManager.LoadOfflineGearDatas))]
     internal static class GearManager_LoadOfflineGearDatas
     {
         // called on both host and client side
         
-        [HarmonyPatch(typeof(GearManager), nameof(GearManager.LoadOfflineGearDatas))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_GearManager_LoadOfflineGearDatas(GearManager __instance)

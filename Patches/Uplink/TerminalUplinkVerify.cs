@@ -1,20 +1,19 @@
-﻿using HarmonyLib;
+﻿using ChainedPuzzles;
+using ExtraObjectiveSetup.Instances;
+using ExtraObjectiveSetup.Objectives.TerminalUplink;
+using GameData;
+using HarmonyLib;
 using LevelGeneration;
 using Localization;
-using GameData;
-using ChainedPuzzles;
-using ExtraObjectiveSetup.Objectives.TerminalUplink;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
 using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkVerify))]
     internal static class TerminalUplinkVerify
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkVerify))]
+        [HarmonyWrapSafe]
         private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalUplinkVerify(LG_ComputerTerminalCommandInterpreter __instance, string param1, string param2, ref bool __result)
         {
             if (__instance.m_terminal.m_isWardenObjective) return true; // vanilla uplink
@@ -27,7 +26,7 @@ namespace ExtraObjectiveSetup.Patches.Uplink
 
             int CurrentRoundIndex = uplinkPuzzle.m_roundIndex;
             int i = uplinkConfig.RoundOverrides.FindIndex(o => o.RoundIndex == CurrentRoundIndex);
-            UplinkRound roundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null;
+            UplinkRound roundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null!;
             TimeSettings timeSettings = i != -1 ? roundOverride.OverrideTimeSettings : uplinkConfig.DefaultTimeSettings;
 
             float timeToStartVerify = timeSettings.TimeToStartVerify >= 0f ? timeSettings.TimeToStartVerify : uplinkConfig.DefaultTimeSettings.TimeToStartVerify;
@@ -48,7 +47,7 @@ namespace ExtraObjectiveSetup.Patches.Uplink
                     {
                         int newRoundIndex = uplinkPuzzle.m_roundIndex;
                         int j = uplinkConfig.RoundOverrides.FindIndex(o => o.RoundIndex == newRoundIndex);
-                        UplinkRound newRoundOverride = j != -1 ? uplinkConfig.RoundOverrides[j] : null;
+                        UplinkRound newRoundOverride = j != -1 ? uplinkConfig.RoundOverrides[j] : null!;
 
                         roundOverride?.EventsOnRound.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.OnMid, false));
 

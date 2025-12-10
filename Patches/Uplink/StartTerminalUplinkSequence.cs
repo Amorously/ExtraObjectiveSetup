@@ -1,13 +1,12 @@
-﻿using ExtraObjectiveSetup.Objectives.TerminalUplink;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
+﻿using ExtraObjectiveSetup.Instances;
+using ExtraObjectiveSetup.Objectives.TerminalUplink;
+using GameData;
 using HarmonyLib;
 using LevelGeneration;
 using Localization;
-using GameData;
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.StartTerminalUplinkSequence))]
     internal static class StartTerminalUplinkSequence
     {
         // rewrite is indispensable
@@ -15,7 +14,7 @@ namespace ExtraObjectiveSetup.Patches.Uplink
         // uplink calls on uplink terminal
         // corruplink calls on receiver side
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.StartTerminalUplinkSequence))]
+        [HarmonyWrapSafe]
         private static bool Pre_LG_ComputerTerminalCommandInterpreter_StartTerminalUplinkSequence(LG_ComputerTerminalCommandInterpreter __instance, string uplinkIp, bool corrupted)
         {
             // normal uplink
@@ -40,7 +39,7 @@ namespace ExtraObjectiveSetup.Patches.Uplink
                     uplinkConfig.EventsOnCommence.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
 
                     int i = uplinkConfig.RoundOverrides.FindIndex(o => o.RoundIndex == 0);
-                    UplinkRound firstRoundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null;
+                    UplinkRound firstRoundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null!;
                     firstRoundOverride?.EventsOnRound.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.OnStart, false));
                 });
             }
@@ -75,7 +74,7 @@ namespace ExtraObjectiveSetup.Patches.Uplink
                     uplinkConfig.EventsOnCommence.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
 
                     int i = uplinkConfig.RoundOverrides.FindIndex(o => o.RoundIndex == 0);
-                    UplinkRound firstRoundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null;
+                    UplinkRound firstRoundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null!;
                     firstRoundOverride?.EventsOnRound.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.OnStart, false));
                 });
             }

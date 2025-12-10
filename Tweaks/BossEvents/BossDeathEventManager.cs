@@ -1,10 +1,8 @@
 ﻿using ExtraObjectiveSetup.BaseClasses;
 using GameData;
-using System.Collections.Concurrent;
 using LevelGeneration;
-using GTFO.API;
-using ExtraObjectiveSetup.Utils;
 using SNetwork;
+using System.Collections.Concurrent;
 
 namespace ExtraObjectiveSetup.Tweaks.BossEvents
 {
@@ -71,7 +69,13 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
             }
         }
 
-        private void Clear()
+        protected override void OnBuildStart()
+        {
+            OnLevelCleanup();
+            SetupForCurrentExpedition();
+        }
+
+        protected override void OnLevelCleanup()
         {
             foreach(var bde in LevelBDEs.Values)
             {
@@ -83,9 +87,9 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
 
         private void SetupForCurrentExpedition()
         {
-            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
+            if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return;
 
-            foreach(var zoneBDE in definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions)
+            foreach(var zoneBDE in Definitions[CurrentMainLevelLayout].Definitions)
             {
                 if(LevelBDEs.ContainsKey(zoneBDE.GlobalZoneIndexTuple()))
                 {
@@ -107,17 +111,6 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
 
                 LevelBDEs[zoneBDE.GlobalZoneIndexTuple()] = zoneBDE;
             }
-        }
-
-        private BossDeathEventManager() 
-        {
-            LevelAPI.OnBuildStart += () => { Clear(); SetupForCurrentExpedition(); };
-            LevelAPI.OnLevelCleanup += Clear;
-        }
-
-        static BossDeathEventManager()
-        {
-
         }
     }
 }

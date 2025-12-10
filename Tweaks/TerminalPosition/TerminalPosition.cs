@@ -1,5 +1,4 @@
-﻿using ExtraObjectiveSetup.Utils;
-using ExtraObjectiveSetup.BaseClasses;
+﻿using ExtraObjectiveSetup.BaseClasses;
 
 namespace ExtraObjectiveSetup.Tweaks.TerminalPosition
 {

@@ -1,31 +1,28 @@
 ﻿using ExtraObjectiveSetup.JSON;
-using ExtraObjectiveSetup.Utils;
 using GTFO.API.Utilities;
-using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
-    public abstract class RundownWiseDefinitionManager<T> where T: new()
+    public abstract class RundownWiseDefinitionManager<T> : BaseManager where T: new()
     {
-        public const int INVALID_RUNDOWN_ID = -1;
-        
+        public const int INVALID_RUNDOWN_ID = -1;        
         public const int APPLY_TO_ALL_RUNDOWN_ID = 0;
 
-        protected Dictionary<int, RundownWiseDefinition<T>> definitions { get; set; } = new();
-        protected abstract string DEFINITION_NAME { get; }
-        public string DEFINITION_PATH { get; private set; }
+        protected Dictionary<int, RundownWiseDefinition<T>> Definitions { get; set; } = new();
 
-        protected virtual void AddDefinitions(RundownWiseDefinition<T> definitions)
+        protected override void ReadFiles()
         {
-            if (definitions == null || definitions.RundownID == INVALID_RUNDOWN_ID) return;
+            File.WriteAllText(Path.Combine(DEFINITION_PATH, "Template.json"), EOSJson.Serialize(new RundownWiseDefinition<T>()));
 
-            if (this.definitions.ContainsKey(definitions.RundownID))
+            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
             {
-                EOSLogger.Log($"Replaced RundownID: '{definitions.RundownID}' ({APPLY_TO_ALL_RUNDOWN_ID} means 'apply to all rundowns')");
+                string content = File.ReadAllText(confFile);
+                var conf = EOSJson.Deserialize<RundownWiseDefinition<T>>(content);
+                AddDefinitions(conf);
             }
-
-            this.definitions[definitions.RundownID] = definitions;
         }
+
+        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
 
         protected virtual void FileChanged(LiveEditEventArgs e)
         {
@@ -37,38 +34,18 @@ namespace ExtraObjectiveSetup.BaseClasses
             });
         }
 
-        public RundownWiseDefinition<T> GetDefinition(uint RundownID) => definitions.TryGetValue((int)RundownID, out var def) ? def : null!; 
-
-        public virtual void Init() { }
-
-        public RundownWiseDefinitionManager()
+        protected virtual void AddDefinitions(RundownWiseDefinition<T> definitions)
         {
-            string MODULE_CUSTOM_FOLDER = Path.Combine(MTFOPathAPI.CustomPath, "ExtraObjectiveSetup");
-            if (!Directory.Exists(MODULE_CUSTOM_FOLDER))
+            if (definitions == null || definitions.RundownID == INVALID_RUNDOWN_ID) return;
+
+            if (Definitions.ContainsKey(definitions.RundownID))
             {
-                Directory.CreateDirectory(MODULE_CUSTOM_FOLDER);
+                EOSLogger.Log($"Replaced RundownID: '{definitions.RundownID}' ({APPLY_TO_ALL_RUNDOWN_ID} means 'apply to all rundowns')");
             }
 
-            DEFINITION_PATH = Path.Combine(MODULE_CUSTOM_FOLDER, DEFINITION_NAME);
-            if (!Directory.Exists(DEFINITION_PATH))
-            {
-                Directory.CreateDirectory(DEFINITION_PATH);
-                var file = File.CreateText(Path.Combine(DEFINITION_PATH, "Template.json"));
-                file.WriteLine(EOSJson.Serialize(new GenericExpeditionDefinition<T>()));
-                file.Flush();
-                file.Close();
-            }
-
-            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
-            {
-                string content = File.ReadAllText(confFile);
-                var conf = EOSJson.Deserialize<RundownWiseDefinition<T>>(content);
-
-                AddDefinitions(conf);
-            }
-
-            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
-            liveEditListener.FileChanged += FileChanged;
+            Definitions[definitions.RundownID] = definitions;
         }
+        
+        public RundownWiseDefinition<T> GetDefinition(uint RundownID) => Definitions.TryGetValue((int)RundownID, out var def) ? def : null!;        
     }
 }

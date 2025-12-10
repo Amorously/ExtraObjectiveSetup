@@ -4,11 +4,9 @@ using ExtraObjectiveSetup.Expedition.Gears;
 
 namespace ExtraObjectiveSetup.Patches.Expedition
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(RundownManager), nameof(RundownManager.SetActiveExpedition))]
     internal static class RundownManager_SetActiveExpedition
-    {
-        
-        [HarmonyPatch(typeof(RundownManager), nameof(RundownManager.SetActiveExpedition))]
+    {        
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_RundownManager_SetActiveExpedition(RundownManager __instance, pActiveExpedition expPackage, ExpeditionInTierData expTierData)

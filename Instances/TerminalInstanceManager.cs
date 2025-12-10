@@ -1,8 +1,6 @@
 ﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
-using ExtraObjectiveSetup.ExtendedWardenEvents;
 using ExtraObjectiveSetup.Tweaks.TerminalTweak;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
 using LevelGeneration;
@@ -18,10 +16,9 @@ namespace ExtraObjectiveSetup.Instances
             EOSToggleTerminalState = 601,
         }
 
-
         public static TerminalInstanceManager Current { get; private set; } = new();
-
-        public static ImmutableList<TERM_Command> UNIQUE_CMDS { get; } = new List<TERM_Command>() {
+        public static ImmutableList<TERM_Command> UNIQUE_CMDS { get; } = new List<TERM_Command>() 
+        {
             TERM_Command.UniqueCommand1,
             TERM_Command.UniqueCommand2,
             TERM_Command.UniqueCommand3,
@@ -29,11 +26,52 @@ namespace ExtraObjectiveSetup.Instances
             TERM_Command.UniqueCommand5,
         }.ToImmutableList();
 
-
         // key: ChainedPuzzleInstance.Pointer
         private Dictionary<IntPtr, LG_ComputerTerminal> UniqueCommandChainPuzzles { get; } = new();
-
         private Dictionary<IntPtr, TerminalWrapper> Wrappers { get; } = new();
+
+        public TerminalInstanceManager()
+        {
+            EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSSetTerminalCommand.ToString(), (uint)TerminalWardenEvents.EOSSetTerminalCommand, SetTerminalCommand);
+            EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSToggleTerminalState.ToString(), (uint)TerminalWardenEvents.EOSToggleTerminalState, ToggleTerminalState);
+        }
+
+        protected override void OnBuildStart()
+        {
+            OnLevelCleanup();
+            base.OnBuildStart();
+        }
+
+        protected override void OnBuildDone() // GatherUniqueCommandChainPuzzles
+        {
+            foreach (var terminalsInZone in Index2Instance.Values)
+            {
+                foreach (var t in terminalsInZone)
+                {
+                    foreach (var cmd in UNIQUE_CMDS)
+                    {
+                        if (!t.m_command.m_commandsPerEnum.ContainsKey(cmd)) continue;
+                        var cmdName = t.m_command.m_commandsPerEnum[cmd];
+                        var events = t.GetUniqueCommandEvents(cmdName);
+
+                        for (int i = 0; i < events.Count; i++)
+                        {
+                            if (t.TryGetChainPuzzleForCommand(cmd, i, out var cp))
+                            {
+                                UniqueCommandChainPuzzles[cp.Pointer] = t;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            UniqueCommandChainPuzzles.Clear();
+            Wrappers.Clear();
+            base.OnLevelCleanup();
+        }
 
         public override (eDimensionIndex dim, LG_LayerType layer, eLocalZoneIndex zone) GetGlobalZoneIndex(LG_ComputerTerminal instance)
         {
@@ -104,36 +142,6 @@ namespace ExtraObjectiveSetup.Instances
 
         public TerminalWrapper GetTerminalWrapper(LG_ComputerTerminal terminal) => Wrappers.ContainsKey(terminal.Pointer) ? Wrappers[terminal.Pointer] : null!;
 
-        private void Clear()
-        {
-            UniqueCommandChainPuzzles.Clear();
-            Wrappers.Clear();
-        }
-
-        private void GatherUniqueCommandChainPuzzles()
-        {
-            foreach (var terminalsInZone in index2Instance.Values) 
-            {
-                foreach(var t in terminalsInZone)
-                {
-                    foreach(var cmd in UNIQUE_CMDS)
-                    {
-                        if (!t.m_command.m_commandsPerEnum.ContainsKey(cmd)) continue;
-                        var cmdName = t.m_command.m_commandsPerEnum[cmd];
-                        var events = t.GetUniqueCommandEvents(cmdName);
-
-                        for(int i = 0; i < events.Count; i++)
-                        {
-                            if(t.TryGetChainPuzzleForCommand(cmd, i, out var cp))
-                            {
-                                UniqueCommandChainPuzzles[cp.Pointer] = t;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         public bool TryGetParentTerminal(ChainedPuzzleInstance cpInstance, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(cpInstance.Pointer, out terminal!);
 
         public bool TryGetParentTerminal(IntPtr pointer, out LG_ComputerTerminal terminal) => UniqueCommandChainPuzzles.TryGetValue(pointer, out terminal!);
@@ -181,17 +189,6 @@ namespace ExtraObjectiveSetup.Instances
             }
 
             wrapper.ChangeState(enabled);
-        }
-
-        private TerminalInstanceManager() 
-        {
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
-
-            LevelAPI.OnEnterLevel += GatherUniqueCommandChainPuzzles;
-
-            EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSSetTerminalCommand.ToString(), (uint)TerminalWardenEvents.EOSSetTerminalCommand, SetTerminalCommand);
-            EOSWardenEventManager.Current.AddEventDefinition(TerminalWardenEvents.EOSToggleTerminalState.ToString(), (uint)TerminalWardenEvents.EOSToggleTerminalState, ToggleTerminalState);
         }
     }
 }

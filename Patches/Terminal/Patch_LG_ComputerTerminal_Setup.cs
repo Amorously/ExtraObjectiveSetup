@@ -1,15 +1,13 @@
-﻿using HarmonyLib;
-using LevelGeneration;
-using ExtraObjectiveSetup.Instances;
+﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Tweaks.TerminalPosition;
-using ExtraObjectiveSetup.Utils;
+using HarmonyLib;
+using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Patches.Terminal
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
     internal static class Patch_LG_ComputerTerminal_Setup
     {        
-        [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_LG_ComputerTerminal_Setup(LG_ComputerTerminal __instance)

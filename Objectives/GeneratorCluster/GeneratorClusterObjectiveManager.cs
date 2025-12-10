@@ -1,21 +1,30 @@
 ﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
-using GTFO.API.Extensions;
 
 namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
 {
     internal sealed class GeneratorClusterObjectiveManager : InstanceDefinitionManager<GeneratorClusterDefinition>
     {
-        public static GeneratorClusterObjectiveManager Current { get; private set; } = new();
-
         protected override string DEFINITION_NAME { get; } = "GeneratorCluster";
+        
+        public static GeneratorClusterObjectiveManager Current { get; private set; } = new();        
 
-        private List<(LG_PowerGeneratorCluster, GeneratorClusterDefinition)> chainedPuzzleToBuild = new();
+        private List<(LG_PowerGeneratorCluster, GeneratorClusterDefinition)> _chainedPuzzleToBuild = new();
 
+        protected override void OnBuildStart() => OnLevelCleanup(); 
+
+        protected override void OnBuildDone()
+        {
+            BuildChainedPuzzleMidObjective();
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            _chainedPuzzleToBuild.Clear();
+        }
+        
         protected override void AddDefinitions(InstanceDefinitionsForLevel<GeneratorClusterDefinition> definitions)
         {
             // because we have chained puzzles, sorting is necessary to preserve chained puzzle instance order.
@@ -23,11 +32,11 @@ namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
             base.AddDefinitions(definitions);
         }
 
-        internal void RegisterForChainedPuzzleBuild(LG_PowerGeneratorCluster __instance, GeneratorClusterDefinition GeneratorClusterConfig) => chainedPuzzleToBuild.Add((__instance, GeneratorClusterConfig));
+        internal void RegisterForChainedPuzzleBuild(LG_PowerGeneratorCluster __instance, GeneratorClusterDefinition GeneratorClusterConfig) => _chainedPuzzleToBuild.Add((__instance, GeneratorClusterConfig));
 
         private void BuildChainedPuzzleMidObjective()
         {
-            foreach (var tuple in chainedPuzzleToBuild)
+            foreach (var tuple in _chainedPuzzleToBuild)
             {
                 LG_PowerGeneratorCluster __instance = tuple.Item1;
                 var config = tuple.Item2;
@@ -52,30 +61,13 @@ namespace ExtraObjectiveSetup.Objectives.GeneratorCluster
                             case eChainedPuzzleStatus.Solved:
                                 if (!isRecall)
                                 {
-                                    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(config.EventsOnEndSequenceChainedPuzzleComplete.ToIl2Cpp(), eWardenObjectiveEventTrigger.None, true);
+                                    EOSWardenEventManager.ExecuteWardenEvents(config.EventsOnEndSequenceChainedPuzzleComplete);
                                 }
                                 break;
                         }
                     });
                 }
             }
-        }
-
-        private void OnBuildDone()
-        {
-            BuildChainedPuzzleMidObjective();
-        }
-
-        private void OnLevelCleanup()
-        {
-            chainedPuzzleToBuild.Clear();
-        }
-
-        private GeneratorClusterObjectiveManager() : base()
-        {
-            LevelAPI.OnBuildDone += OnBuildDone;
-            LevelAPI.OnLevelCleanup += OnLevelCleanup;
-            LevelAPI.OnBuildStart += OnLevelCleanup;
         }
     }
 }

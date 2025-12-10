@@ -1,6 +1,5 @@
 ﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.IndividualGenerator;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using HarmonyLib;
 using LevelGeneration;
@@ -18,7 +17,7 @@ namespace ExtraObjectiveSetup.Patches.PowerGenerator
         private static void Post_PowerGenerator_Setup(LG_PowerGenerator_Core __instance)
         {
             // do some minor vanilla bug fix
-            __instance.m_powerCellInteraction.AttemptCarryItemInsert += new System.Action<SNet_Player, Item>((p, item) =>
+            __instance.m_powerCellInteraction.AttemptCarryItemInsert += new Action<SNet_Player, Item>((p, item) =>
             {
 
                 if (PlayerBackpackManager.TryGetItemInLevelFromItemData(item.Get_pItemData(), out var itemInLevel))

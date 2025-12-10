@@ -1,18 +1,17 @@
-﻿using ExtraObjectiveSetup.Objectives.TerminalUplink;
-using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
+﻿using ExtraObjectiveSetup.Instances;
+using ExtraObjectiveSetup.Objectives.TerminalUplink;
 using HarmonyLib;
 using LevelGeneration;
 using Localization;
 
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalCorruptedUplinkConnect))]
     internal static class CorruptedUplinkConnect
     {
         // rewrite the method to do more things
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalCorruptedUplinkConnect))]
+        [HarmonyWrapSafe]
         private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalCorruptedUplinkConnect(LG_ComputerTerminalCommandInterpreter __instance, string param1, string param2, ref bool __result)
         {
             var sender = __instance.m_terminal;

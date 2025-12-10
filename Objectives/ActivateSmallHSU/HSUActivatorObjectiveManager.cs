@@ -2,19 +2,38 @@
 using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
-using GTFO.API.Extensions;
 using UnityEngine;
 
 namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
 {
     internal sealed class HSUActivatorObjectiveManager : InstanceDefinitionManager<HSUActivatorDefinition>
     {
-        public static HSUActivatorObjectiveManager Current { get; private set; } = new();
-
         protected override string DEFINITION_NAME { get; } = "ActivateSmallHSU";
+        
+        public static HSUActivatorObjectiveManager Current { get; private set; } = new();   
+        
+        private readonly Dictionary<IntPtr, HSUActivatorDefinition> _hsuActivatorPuzzles = new(); // key: ChainedPuzzleInstance.Pointer    
+
+        protected override void OnBuildStart() => OnLevelCleanup();
+
+        protected override void OnBuildDone()
+        {
+            if (!Definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
+            Definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(BuildHSUActivatorChainedPuzzle);
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            //if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
+            //definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(def => { def.ChainedPuzzleOnActivationInstance = null; });
+            foreach (var h in _hsuActivatorPuzzles.Values)
+            {
+                h.ChainedPuzzleOnActivationInstance = null!;
+            }
+
+            _hsuActivatorPuzzles.Clear();
+        }
 
         protected override void AddDefinitions(InstanceDefinitionsForLevel<HSUActivatorDefinition> definitions)
         {
@@ -22,11 +41,6 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
             Sort(definitions);
             base.AddDefinitions(definitions);
         }
-
-        //private List<HSUActivatorDefinition> builtHSUActivatorPuzzles = new();
-
-        // key: ChainedPuzzleInstance.Pointer
-        private Dictionary<IntPtr, HSUActivatorDefinition> m_HSUActivatorPuzzles = new();
 
         private void BuildHSUActivatorChainedPuzzle(HSUActivatorDefinition def)
         {
@@ -76,7 +90,7 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
 
                     def.ChainedPuzzleOnActivationInstance = puzzleInstance;
 
-                    m_HSUActivatorPuzzles[puzzleInstance.Pointer] = def;
+                    _hsuActivatorPuzzles[puzzleInstance.Pointer] = def;
 
                     // PuzzleInstance will be activated in SyncStateChanged
                     // EventsOnActivationScanSolved and HSU removeSequence will be executed in 
@@ -89,7 +103,7 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
                             case eChainedPuzzleStatus.Solved:
                                 if (!isRecall)
                                 {
-                                    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(def.EventsOnActivationScanSolved.ToIl2Cpp(), eWardenObjectiveEventTrigger.None, true);
+                                    EOSWardenEventManager.ExecuteWardenEvents(def.EventsOnActivationScanSolved);
                                     if (def.TakeOutItemAfterActivation)
                                     {
                                         instance.m_triggerExtractSequenceRoutine = instance.StartCoroutine(instance.TriggerRemoveSequence());
@@ -111,31 +125,6 @@ namespace ExtraObjectiveSetup.Objectives.ActivateSmallHSU
             }
         }
 
-        private void OnBuildDone()
-        {
-            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
-            definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(BuildHSUActivatorChainedPuzzle);
-        }
-
-        private void OnLevelCleanup()
-        {
-            //if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
-            //definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(def => { def.ChainedPuzzleOnActivationInstance = null; });
-            foreach(var h in m_HSUActivatorPuzzles.Values)
-            {
-                h.ChainedPuzzleOnActivationInstance = null!;
-            }
-
-            m_HSUActivatorPuzzles.Clear();
-        }
-
-        internal HSUActivatorDefinition GetHSUActivatorDefinition(ChainedPuzzleInstance chainedPuzzle) => m_HSUActivatorPuzzles.TryGetValue(chainedPuzzle.Pointer, out var def) ? def : null!;
-
-        private HSUActivatorObjectiveManager() : base()
-        {
-            LevelAPI.OnBuildDone += OnBuildDone;
-            LevelAPI.OnLevelCleanup += OnLevelCleanup;
-            LevelAPI.OnBuildStart += OnLevelCleanup;
-        }
+        internal HSUActivatorDefinition GetHSUActivatorDefinition(ChainedPuzzleInstance chainedPuzzle) => _hsuActivatorPuzzles.TryGetValue(chainedPuzzle.Pointer, out var def) ? def : null!;
     }
 }

@@ -1,23 +1,39 @@
 ﻿using ExtraObjectiveSetup.BaseClasses;
-using ExtraObjectiveSetup.ExtendedWardenEvents;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
-
 
 namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 {
-    public class ObjectiveCounterManager : GenericExpeditionDefinitionManager<ObjectiveCounterDefinition>
+    public sealed class ObjectiveCounterManager : GenericExpeditionDefinitionManager<ObjectiveCounterDefinition>
     {
+        protected override string DEFINITION_NAME => "ObjectiveCounter";
+        
         public static ObjectiveCounterManager Current { get; } = new();
 
-        private Dictionary<string, Counter> Counters { get; } = new();
+        private Dictionary<string, Counter> _counters { get; } = new();        
 
-        protected override string DEFINITION_NAME => "ObjectiveCounter";
+        public ObjectiveCounterManager() 
+        {
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);               
+        }
+        
+        protected override void OnBuildStart() => Clear();
+        protected override void OnBuildDone() => BuildCounters();   
+        protected override void OnLevelCleanup() => Clear();
 
+        private void BuildCounters()
+        {
+            if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return;
+            Definitions[CurrentMainLevelLayout].Definitions.ForEach(Build);
+        }
+
+        private void Clear()
+        {
+            _counters.Clear();
+        }
+        
         private void Build(ObjectiveCounterDefinition def)
         {
-            if(Counters.ContainsKey(def.WorldEventObjectFilter))
+            if(_counters.ContainsKey(def.WorldEventObjectFilter))
             {
                 EOSLogger.Error($"Build Counter: counter '{def.WorldEventObjectFilter}' already exists...");
                 return;
@@ -30,13 +46,13 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
                 return;
             }
 
-            Counters[def.WorldEventObjectFilter] = counter;
+            _counters[def.WorldEventObjectFilter] = counter;
             EOSLogger.Debug($"Build Counter: counter '{def.WorldEventObjectFilter}' setup completed");
         }
 
         public void ChangeCounter(string worldEventObjectFilter, int by)
         {
-            if(!Counters.ContainsKey(worldEventObjectFilter))
+            if(!_counters.ContainsKey(worldEventObjectFilter))
             {
                 EOSLogger.Error($"ChangeCounter: {worldEventObjectFilter} is not defined");
                 return;
@@ -44,7 +60,7 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 
             if (by == 0) return;
 
-            var counter = Counters[worldEventObjectFilter];
+            var counter = _counters[worldEventObjectFilter];
             if(by > 0)
             {
                 counter.Increment(by);
@@ -60,25 +76,6 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
             string worldEventObjectFilter = e.WorldEventObjectFilter;
             int by = e.Count;
             ChangeCounter(worldEventObjectFilter, by);
-        }
-
-        private void BuildCounters()
-        {
-            if (!definitions.ContainsKey(CurrentMainLevelLayout)) return;
-            definitions[CurrentMainLevelLayout].Definitions.ForEach(Build);
-        }
-
-        private void Clear()
-        {
-            Counters.Clear();
-        }
-
-        private ObjectiveCounterManager() 
-        {
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
-            LevelAPI.OnBuildDone += BuildCounters;
-            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);               
         }
     }
 }

@@ -8,14 +8,13 @@ using Localization;
 
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkConnect))]
     internal static class TerminalUplinkConnect
     {
         // normal uplink: rewrite the method to do more things
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkConnect))]
-        private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalUplinkConnect(
-            LG_ComputerTerminalCommandInterpreter __instance, string param1, string param2, ref bool __result)
+        [HarmonyWrapSafe]
+        private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalUplinkConnect(LG_ComputerTerminalCommandInterpreter __instance, string param1, string param2, ref bool __result)
         {
             var uplinkTerminal = __instance.m_terminal;
 

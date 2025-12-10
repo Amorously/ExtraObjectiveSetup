@@ -1,10 +1,12 @@
-﻿using AmorLib.Dependencies;
+﻿global using ExtraObjectiveSetup.ExtendedWardenEvents;
+global using ExtraObjectiveSetup.Utils;
+using AmorLib.Dependencies;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using ExtraObjectiveSetup.Expedition;
-using ExtraObjectiveSetup.Expedition.Gears;
-using ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup;
+using ExtraObjectiveSetup.BaseClasses;
+using GTFO.API;
 using HarmonyLib;
+using System.Reflection;
 
 namespace ExtraObjectiveSetup
 {
@@ -14,44 +16,39 @@ namespace ExtraObjectiveSetup
     [BepInDependency("Amor.AmorLib", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(InjectLib_Wrapper.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(PData_Wrapper.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
-     public sealed class EntryPoint: BasePlugin
+    [BepInDependency("com.sinai.UnityExplorer", BepInDependency.DependencyFlags.SoftDependency)]
+    internal sealed class EntryPoint : BasePlugin
     {
         public const string AUTHOR = "Inas";
         public const string PLUGIN_NAME = "ExtraObjectiveSetup";
         public const string VERSION = "1.7.0";
-        
+
+        private readonly List<Type[]> _callbackAssemblyTypes = new() { AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()) };
+
         public override void Load()
-        {
+        { 
             new Harmony("ExtraObjectiveSetup").PatchAll();
-            SetupManagers();
+
+            InteropAPI.RegisterCall("EOS_Managers", args =>
+            {
+                if (args?.Length > 0 && args[0] is Type[] types)
+                {
+                    _callbackAssemblyTypes.Add(types);
+                }
+                return null;
+            });
+
+            AssetAPI.OnStartupAssetsLoaded += SetupManagers;
+            EOSLogger.Log("EOS is done loading!");
         }
 
-        /// <summary>
-        /// Explicitly invoke Init() to all managers to eager-load, which in the meantime defines chained puzzle creation order if any
-        /// </summary>
-        private static void SetupManagers()
+        private void SetupManagers()
         {
-            Objectives.IndividualGenerator.IndividualGeneratorObjectiveManager.Current.Init();
-            Objectives.GeneratorCluster.GeneratorClusterObjectiveManager.Current.Init();
-            Objectives.ActivateSmallHSU.HSUActivatorObjectiveManager.Current.Init();
-            Objectives.TerminalUplink.UplinkObjectiveManager.Current.Init();
-
-            Tweaks.TerminalPosition.TerminalPositionOverrideManager.Current.Init();
-            Tweaks.Scout.ScoutScreamEventManager.Current.Init();
-            Tweaks.BossEvents.BossDeathEventManager.Current.Init();
-            //Tweaks.TerminalTweak.TerminalTweakManager.Current.Init();
-
-            ExpeditionDefinitionManager.Current.Init();
-            ExpeditionGearManager.Current.Init();
-            ExpeditionIGGroupManager.Current.Init();
-
-            Instances.GeneratorClusterInstanceManager.Current.Init();
-            Instances.HSUActivatorInstanceManager.Current.Init();
-            Instances.PowerGeneratorInstanceManager.Current.Init();
-            Instances.TerminalInstanceManager.Current.Init();
-
-            Objectives.ObjectiveCounter.ObjectiveCounterManager.Current.Init();
+            var managers = _callbackAssemblyTypes
+                .SelectMany(types => types)
+                .Where(t => typeof(BaseManager).IsAssignableFrom(t) && !t.IsAbstract)
+                .Select(t => (BaseManager)Activator.CreateInstance(t)!);
+            BaseManager.SetupManagers(managers);
         }
     }
 }
-

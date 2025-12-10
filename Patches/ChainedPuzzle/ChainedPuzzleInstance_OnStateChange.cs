@@ -4,11 +4,9 @@ using HarmonyLib;
 
 namespace ExtraObjectiveSetup.Patches.ChainedPuzzle
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ChainedPuzzleInstance), nameof(ChainedPuzzleInstance.OnStateChange))]
     internal static class ChainedPuzzleInstance_OnStateChange
-    {
-        
-        [HarmonyPatch(typeof(ChainedPuzzleInstance), nameof(ChainedPuzzleInstance.OnStateChange))]
+    {        
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_ChainedPuzzleOnActivationInstance_OnStateChange(ChainedPuzzleInstance __instance, pChainedPuzzleState oldState, pChainedPuzzleState newState, bool isRecall)

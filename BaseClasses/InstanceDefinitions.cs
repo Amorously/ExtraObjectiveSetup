@@ -2,12 +2,12 @@
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
-    public class BaseInstanceDefinition: GlobalZoneIndex
+    public class BaseInstanceDefinition: GlobalBased
     {
         [JsonPropertyOrder(-8)]
-        public uint InstanceIndex { get; set; } = uint.MaxValue;
+        public uint InstanceIndex { get; set; } = uint.MaxValue;        
 
-        public override string ToString() => $"{GlobalZoneIndexTuple()}, Instance_{InstanceIndex}";
+        public override string ToString() => base.ToString() + $", Instance_{InstanceIndex}";
     }
 
     public class InstanceDefinitionsForLevel<T> where T : BaseInstanceDefinition, new()

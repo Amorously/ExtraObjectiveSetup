@@ -1,20 +1,19 @@
 ﻿using ChainedPuzzles;
-using ExtraObjectiveSetup.Objectives.TerminalUplink;
 using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
+using ExtraObjectiveSetup.Objectives.TerminalUplink;
 using HarmonyLib;
 using LevelGeneration;
-using SNetwork;
 using Localization;
+using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalCorruptedUplinkConfirm))]
     internal static class CorruptedUplinkConfirm
     {
         // rewrite the method to do more things
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalCorruptedUplinkConfirm))]
+        [HarmonyWrapSafe]
         private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalCorruptedUplinkConfirm(LG_ComputerTerminalCommandInterpreter __instance, string param1, string param2, ref bool __result)
         {
             // invoked on receiver side

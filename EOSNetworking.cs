@@ -1,5 +1,4 @@
-﻿using ExtraObjectiveSetup.Utils;
-using GTFO.API;
+﻿using GTFO.API;
 
 namespace ExtraObjectiveSetup
 {

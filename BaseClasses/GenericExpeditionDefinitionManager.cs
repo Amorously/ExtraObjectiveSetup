@@ -1,28 +1,26 @@
 ﻿using ExtraObjectiveSetup.JSON;
-using ExtraObjectiveSetup.Utils;
 using GTFO.API.Utilities;
-using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
-    public abstract class GenericExpeditionDefinitionManager<T> where T: new()
+    public abstract class GenericExpeditionDefinitionManager<T> : BaseManager where T: new()
     {
-        public uint CurrentMainLevelLayout => RundownManager.ActiveExpedition?.LevelLayoutData ?? 0;
-        protected Dictionary<uint, GenericExpeditionDefinition<T>> definitions { get; set; } = new();
-        protected abstract string DEFINITION_NAME { get; }
-        public string DEFINITION_PATH { get; private set; }
-
-        protected virtual void AddDefinitions(GenericExpeditionDefinition<T> definitions)
+        protected Dictionary<uint, GenericExpeditionDefinition<T>> Definitions { get; set; } = new();        
+        
+        protected override void ReadFiles()
         {
-            if (definitions == null) return;
 
-            if (this.definitions.ContainsKey(definitions.MainLevelLayout))
+            File.WriteAllText(Path.Combine(DEFINITION_PATH, "Template.json"), EOSJson.Serialize(new GenericExpeditionDefinition<T>()));
+
+            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
             {
-                EOSLogger.Log("Replaced MainLevelLayout {0}", definitions.MainLevelLayout);
+                string content = File.ReadAllText(confFile);
+                var conf = EOSJson.Deserialize<GenericExpeditionDefinition<T>>(content);
+                AddDefinitions(conf);
             }
-
-            this.definitions[definitions.MainLevelLayout] = definitions;
         }
+
+        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
 
         protected virtual void FileChanged(LiveEditEventArgs e)
         {
@@ -33,39 +31,19 @@ namespace ExtraObjectiveSetup.BaseClasses
                 AddDefinitions(conf);
             });
         }
-
-        public GenericExpeditionDefinition<T> GetDefinition(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout] : null!;
-
-        public virtual void Init() { }
-
-        public GenericExpeditionDefinitionManager()
+        
+        protected virtual void AddDefinitions(GenericExpeditionDefinition<T> definitions)
         {
-            string MODULE_CUSTOM_FOLDER = Path.Combine(MTFOPathAPI.CustomPath, "ExtraObjectiveSetup");
-            if (!Directory.Exists(MODULE_CUSTOM_FOLDER))
+            if (definitions == null) return;
+
+            if (Definitions.ContainsKey(definitions.MainLevelLayout))
             {
-                Directory.CreateDirectory(MODULE_CUSTOM_FOLDER);
+                EOSLogger.Log("Replaced MainLevelLayout {0}", definitions.MainLevelLayout);
             }
 
-            DEFINITION_PATH = Path.Combine(MODULE_CUSTOM_FOLDER, DEFINITION_NAME);
-            if (!Directory.Exists(DEFINITION_PATH))
-            {
-                Directory.CreateDirectory(DEFINITION_PATH);
-                var file = File.CreateText(Path.Combine(DEFINITION_PATH, "Template.json"));
-                file.WriteLine(EOSJson.Serialize(new GenericExpeditionDefinition<T>()));
-                file.Flush();
-                file.Close();
-            }
-
-            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
-            {
-                string content = File.ReadAllText(confFile);
-                var conf = EOSJson.Deserialize<GenericExpeditionDefinition<T>>(content);
-
-                AddDefinitions(conf);
-            }
-
-            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
-            liveEditListener.FileChanged += FileChanged;
-        }
+            Definitions[definitions.MainLevelLayout] = definitions;
+        }   
+        
+        public GenericExpeditionDefinition<T> GetDefinition(uint MainLevelLayout) => Definitions.ContainsKey(MainLevelLayout) ? Definitions[MainLevelLayout] : null!;        
     }
 }

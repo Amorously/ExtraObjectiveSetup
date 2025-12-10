@@ -54,7 +54,7 @@ namespace ExtraObjectiveSetup.Utils
                         ChainedPuzzleInstance puzzleInstance = ChainedPuzzleManager.CreatePuzzleInstance(block, sourceArea, transform.position, transform, e.UseStaticBioscanPoints);
 
                         var events = cmd.CommandEvents.GetRange(i, cmd.CommandEvents.Count - i).ToIl2Cpp(); 
-                        puzzleInstance.OnPuzzleSolved += new System.Action(() => {
+                        puzzleInstance.OnPuzzleSolved += new Action(() => {
                             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(events, eWardenObjectiveEventTrigger.None, true);
                         });
 

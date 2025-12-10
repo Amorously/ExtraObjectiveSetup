@@ -1,43 +1,62 @@
 ﻿using ExtraObjectiveSetup.JSON;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API.Utilities;
 using LevelGeneration;
-using MTFO.API;
 
 namespace ExtraObjectiveSetup.BaseClasses
 {
-    /// <summary>
-    /// Objective definition manager, holds all objective definition of type T.
-    /// Enables live edit of definitions.
-    /// </summary>
-    /// <typeparam name="T"> Common base class of objective definition. </typeparam>
-    public abstract class InstanceDefinitionManager<T> where T : BaseInstanceDefinition, new()
-    {
-        /// <summary>
-        /// Path to the common parent folder of ALL definitions 
-        /// </summary>
-        public static string MODULE_CUSTOM_FOLDER { get; private set; } = Path.Combine(MTFOPathAPI.CustomPath, "ExtraObjectiveSetup");
+    public abstract class InstanceDefinitionManager<T> : BaseManager where T : BaseInstanceDefinition, new()
+    { 
+        protected Dictionary<uint, InstanceDefinitionsForLevel<T>> Definitions { get; set; } = new();
 
-        /// <summary>
-        /// Definitions holder. Hold all definitions of this type (the generic type T) for the loaded rundown(s) (or, to be more specific, profile).
-        /// Subclasses should not modify its contents, except properies with [JsonIgnore] attribute.
-        /// </summary>
-        protected Dictionary<uint, InstanceDefinitionsForLevel<T>> definitions = new();
+        protected override void ReadFiles()
+        {
+            File.WriteAllText(Path.Combine(DEFINITION_PATH, "Template.json"), EOSJson.Serialize(new InstanceDefinitionsForLevel<T>()));
 
-        /// <summary>
-        /// The name of definition to hold. This defines the definition file path from which to fetch, live-edit definition data. 
-        /// </summary>
-        protected abstract string DEFINITION_NAME { get; }
+            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
+            {
+                string content = File.ReadAllText(confFile);
+                var conf = EOSJson.Deserialize<InstanceDefinitionsForLevel<T>>(content);
+                AddDefinitions(conf);
+            }
+        }
 
-        /// <summary>
-        /// Path to all definition files of this type (generic type T) of definition. 
-        /// </summary>
-        protected string DEFINITION_PATH { get; private set; } 
+        protected virtual void AddDefinitions(InstanceDefinitionsForLevel<T> definitions)
+        {
+            if (definitions == null) return;
 
-        /// <summary>
-        /// Utility method. Sort definitions by dimension index, layer type, local index and instance index.
-        /// </summary>
+            if (Definitions.ContainsKey(definitions.MainLevelLayout))
+            {
+                EOSLogger.Log("Replaced MainLevelLayout {0}", definitions.MainLevelLayout);
+            }
+
+            Definitions[definitions.MainLevelLayout] = definitions;
+        }
+
+        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
+
+        protected virtual void FileChanged(LiveEditEventArgs e)
+        {
+            EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LiveEdit.TryReadFileContent(e.FullPath, (content) =>
+            {
+                InstanceDefinitionsForLevel<T> conf = EOSJson.Deserialize<InstanceDefinitionsForLevel<T>>(content);
+                AddDefinitions(conf);
+            });
+        }
+        
+        public virtual List<T> GetDefinitionsForLevel(uint MainLevelLayout) => Definitions.ContainsKey(MainLevelLayout) ? Definitions[MainLevelLayout].Definitions : null!;
+
+        public T GetDefinition((eDimensionIndex, LG_LayerType, eLocalZoneIndex) globalIndex, uint instanceIndex) => GetDefinition(globalIndex.Item1, globalIndex.Item2, globalIndex.Item3, instanceIndex);
+
+        public virtual T GetDefinition(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex)
+        {
+            if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return null!;
+
+            return Definitions[CurrentMainLevelLayout]
+                .Definitions.Find(def => def.DimensionIndex == dimensionIndex && def.LayerType == layerType && def.LocalIndex == localIndex && def.InstanceIndex == instanceIndex)!;
+        }
+
         protected void Sort(InstanceDefinitionsForLevel<T> levelDefs)
         {
             levelDefs.Definitions.Sort((u1, u2) =>
@@ -48,91 +67,6 @@ namespace ExtraObjectiveSetup.BaseClasses
                 if (u1.InstanceIndex != u2.InstanceIndex) return u1.InstanceIndex < u2.InstanceIndex ? -1 : -1;
                 return 0;
             });
-        }
-
-        /// <summary>
-        /// Add objective definitions for a level.
-        /// </summary>
-        /// <param name="definitions">definitions of a level to be added</param>
-        protected virtual void AddDefinitions(InstanceDefinitionsForLevel<T> definitions)
-        {
-            if (definitions == null) return;
-
-            if (this.definitions.ContainsKey(definitions.MainLevelLayout))
-            {
-                EOSLogger.Log("Replaced MainLevelLayout {0}", definitions.MainLevelLayout);
-            }
-
-            this.definitions[definitions.MainLevelLayout] = definitions;
-        }
-
-        /// <summary>
-        /// Common callback function of live-edit, implements definition add / update.
-        /// If additional operation is needed in subclasses, turn to `liveEditListener` instead.
-        /// </summary>
-        /// <param name="e">live edit args</param>
-        protected virtual void FileChanged(LiveEditEventArgs e)
-        {
-            EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
-            LiveEdit.TryReadFileContent(e.FullPath, (content) =>
-            {
-                InstanceDefinitionsForLevel<T> conf = EOSJson.Deserialize<InstanceDefinitionsForLevel<T>>(content);
-                AddDefinitions(conf);
-            });
-        }
-
-        public virtual List<T> GetDefinitionsForLevel(uint MainLevelLayout) => definitions.ContainsKey(MainLevelLayout) ? definitions[MainLevelLayout].Definitions : null;
-
-        /// <summary>
-        /// Get definitni
-        /// </summary>
-        /// <param name="globalIndex"></param>
-        /// <param name="instanceIndex"></param>
-        /// <returns></returns>
-        public T GetDefinition((eDimensionIndex, LG_LayerType, eLocalZoneIndex) globalIndex, uint instanceIndex) => GetDefinition(globalIndex.Item1, globalIndex.Item2, globalIndex.Item3, instanceIndex);
-
-        public virtual T GetDefinition(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex)
-        {
-            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return null!;
-
-            return definitions[RundownManager.ActiveExpedition.LevelLayoutData]
-                .Definitions.Find(def => def.DimensionIndex == dimensionIndex && def.LayerType == layerType && def.LocalIndex == localIndex && def.InstanceIndex == instanceIndex)!;
-        }
-
-        /// <summary>
-        /// Initialize this definition manager. Subclasses are not required to implement this method. 
-        /// Invoke this method to eagerly load the definition manager.
-        /// </summary>
-        public virtual void Init() { }
-
-        protected InstanceDefinitionManager()
-        {
-            if (!Directory.Exists(MODULE_CUSTOM_FOLDER))
-            {
-                Directory.CreateDirectory(MODULE_CUSTOM_FOLDER);
-            }
-
-            DEFINITION_PATH = Path.Combine(MODULE_CUSTOM_FOLDER, DEFINITION_NAME);
-
-            if (!Directory.Exists(DEFINITION_PATH))
-            {
-                Directory.CreateDirectory(DEFINITION_PATH);
-                var file = File.CreateText(Path.Combine(DEFINITION_PATH, "Template.json"));
-                file.WriteLine(EOSJson.Serialize(new InstanceDefinitionsForLevel<T>()));
-                file.Flush();
-                file.Close();
-            }
-
-            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
-            {
-                string content = File.ReadAllText(confFile);
-                InstanceDefinitionsForLevel<T> conf = EOSJson.Deserialize<InstanceDefinitionsForLevel<T>>(content);
-
-                AddDefinitions(conf);
-            }
-
-            var liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
-            liveEditListener.FileChanged += FileChanged;
-        }
+        }        
     }
 }

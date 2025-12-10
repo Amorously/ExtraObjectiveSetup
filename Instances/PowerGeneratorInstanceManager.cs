@@ -1,7 +1,5 @@
 ﻿using ExtraObjectiveSetup.BaseClasses;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
 using LevelGeneration;
 using System.Text;
 
@@ -11,9 +9,44 @@ namespace ExtraObjectiveSetup.Instances
     {
         public static PowerGeneratorInstanceManager Current { get; private set; } = new();
 
-        //private HashSet<IntPtr> gcGenerators = new();
-
         private Dictionary<IntPtr, LG_PowerGeneratorCluster> gcGenerators = new();
+
+        protected override void OnBuildStart()
+        {
+            OnLevelCleanup();
+            base.OnBuildStart();
+        }
+
+        protected override void OnBuildDone() // OutputLevelInstanceInfo
+        {
+            StringBuilder s = new();
+            s.AppendLine();
+
+            foreach (var globalZoneIndex in RegisteredZones())
+            {
+                s.AppendLine($"{globalZoneIndex.Item3}, {globalZoneIndex.Item2}, Dim {globalZoneIndex.Item1}");
+
+                List<LG_PowerGenerator_Core> PGInstanceInZone = GetInstancesInZone(globalZoneIndex);
+                for (int instanceIndex = 0; instanceIndex < PGInstanceInZone.Count; instanceIndex++)
+                {
+                    var PGInstance = PGInstanceInZone[instanceIndex];
+                    s.AppendLine($"GENERATOR_{PGInstance.m_serialNumber}. Instance index: {instanceIndex}");
+                }
+
+                s.AppendLine();
+            }
+
+            string msg = s.ToString();
+
+            if (!string.IsNullOrWhiteSpace(msg))
+                EOSLogger.Debug(s.ToString());
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            gcGenerators.Clear();
+            base.OnLevelCleanup();
+        }
 
         public override (eDimensionIndex, LG_LayerType, eLocalZoneIndex) GetGlobalZoneIndex(LG_PowerGenerator_Core instance) => (instance.SpawnNode.m_dimension.DimensionIndex, instance.SpawnNode.LayerType, instance.SpawnNode.m_zone.LocalIndex);
 
@@ -47,42 +80,5 @@ namespace ExtraObjectiveSetup.Instances
         public bool IsGCGenerator(LG_PowerGenerator_Core instance) => gcGenerators.ContainsKey(instance.Pointer);
 
         public LG_PowerGeneratorCluster GetParentGeneratorCluster(LG_PowerGenerator_Core instance) => gcGenerators.TryGetValue(instance.Pointer, out var gc) ? gc : null!;
-
-        private void OutputLevelInstanceInfo()
-        {
-            StringBuilder s = new();
-            s.AppendLine();
-
-            foreach (var globalZoneIndex in RegisteredZones())
-            {
-                s.AppendLine($"{globalZoneIndex.Item3}, {globalZoneIndex.Item2}, Dim {globalZoneIndex.Item1}");
-
-                List<LG_PowerGenerator_Core> PGInstanceInZone = GetInstancesInZone(globalZoneIndex);
-                for (int instanceIndex = 0; instanceIndex < PGInstanceInZone.Count; instanceIndex++)
-                {
-                    var PGInstance = PGInstanceInZone[instanceIndex];
-                    s.AppendLine($"GENERATOR_{PGInstance.m_serialNumber}. Instance index: {instanceIndex}");
-                }
-
-                s.AppendLine();
-            }
-
-            string msg = s.ToString();
-
-            if (!string.IsNullOrWhiteSpace(msg))
-                EOSLogger.Debug(s.ToString());
-        }
-
-        private void Clear()
-        {
-            gcGenerators.Clear();
-        }
-
-        private PowerGeneratorInstanceManager() 
-        {
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
-            LevelAPI.OnEnterLevel += OutputLevelInstanceInfo;
-        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AmorLib.Networking.StateReplicators;
-using ExtraObjectiveSetup.Utils;
 using GTFO.API.Extensions;
 
 namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter

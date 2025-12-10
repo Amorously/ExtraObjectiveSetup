@@ -1,4 +1,5 @@
 ﻿using AmorLib.Networking.StateReplicators;
+using ExtraObjectiveSetup.BaseClasses;
 using GameData;
 using System.Text.Json.Serialization;
 
@@ -25,7 +26,7 @@ namespace ExtraObjectiveSetup.Tweaks.BossEvents
         }
     }
 
-    public class EventsOnZoneBossDeath: BaseClasses.GlobalZoneIndex
+    public class EventsOnZoneBossDeath: GlobalBased
     {
         public bool ApplyToHibernate { get; set; } = true;
         

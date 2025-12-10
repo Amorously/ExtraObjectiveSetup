@@ -1,14 +1,12 @@
 ﻿using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
 using HarmonyLib;
 using LevelGeneration;
 
 namespace ExtraObjectiveSetup.Patches.Terminal
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.SetupCommandEvents))]
     internal static class Patch_RepeatableCommandEventFix
     {        
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.SetupCommandEvents))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_ResetRepeatableUniqueCommandChainedPuzzle(LG_ComputerTerminalCommandInterpreter __instance)

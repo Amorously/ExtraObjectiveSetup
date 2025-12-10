@@ -1,6 +1,5 @@
 ﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.ActivateSmallHSU;
-using ExtraObjectiveSetup.Utils;
 using HarmonyLib;
 using LevelGeneration;
 using Player;
@@ -8,10 +7,9 @@ using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches.HSUActivator
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_HSUActivator_Core), nameof(LG_HSUActivator_Core.SetupFromCustomGeomorph))]
     internal static class SetupFromCustomGeomorph
     {
-        [HarmonyPatch(typeof(LG_HSUActivator_Core), nameof(LG_HSUActivator_Core.SetupFromCustomGeomorph))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_LG_HSUActivator_Core_SetupFromCustomGeomorph(LG_HSUActivator_Core __instance)

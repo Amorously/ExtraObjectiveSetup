@@ -1,8 +1,9 @@
-﻿using GameData;
+﻿using ExtraObjectiveSetup.BaseClasses;
+using GameData;
 
 namespace ExtraObjectiveSetup.Tweaks.Scout
 {
-    public class EventsOnZoneScoutScream: BaseClasses.GlobalZoneIndex
+    public class EventsOnZoneScoutScream: GlobalBased
     {
         public bool SuppressVanillaScoutWave { get; set; } = false;
 

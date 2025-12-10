@@ -3,9 +3,7 @@ using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Instances.ChainedPuzzle;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
 using GTFO.API.Extensions;
 using LevelGeneration;
 using Localization;
@@ -15,22 +13,35 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 {
     internal sealed class UplinkObjectiveManager: InstanceDefinitionManager<UplinkDefinition>
     {
+        protected override string DEFINITION_NAME { get; } = "TerminalUplink";
+        
         public static UplinkObjectiveManager Current { get; private set; } = new();
 
         private TextDataBlock UplinkAddrLogContentBlock = null!;
+        private readonly Dictionary<IntPtr, StateReplicator<UplinkState>> _stateReplicators = new();
+        private readonly List<UplinkRound> _builtRoundPuzzles = new();
 
-        private Dictionary<IntPtr, StateReplicator<UplinkState>> stateReplicators = new();
+        protected override void OnBuildStart() => OnLevelCleanup();
 
-        private List<UplinkRound> builtRoundPuzzles = new();
+        protected override void OnBuildDone()
+        {
+            if (!Definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
+            UplinkAddrLogContentBlock ??= GameDataBlockBase<TextDataBlock>.GetBlock("InGame.UplinkTerminal.UplinkAddrLog");
+            Definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(Build);
+        }
 
-        protected override string DEFINITION_NAME { get; } = "TerminalUplink";
+        protected override void OnLevelCleanup()
+        {
+            _builtRoundPuzzles.ForEach(r => { r.ChainedPuzzleToEndRoundInstance = null!; });
+            _builtRoundPuzzles.Clear();
+            _stateReplicators.Clear();
+        }
 
         protected override void AddDefinitions(InstanceDefinitionsForLevel<UplinkDefinition> definitions)
         {
             // because we have chained puzzles, sorting is necessary to preserve chained puzzle instance order.
             Sort(definitions);
             definitions.Definitions.ForEach(u => u.RoundOverrides.Sort((r1, r2) => r1.RoundIndex != r2.RoundIndex ? (r1.RoundIndex < r2.RoundIndex ? -1 : 1) : 0));
-
             base.AddDefinitions(definitions);
         }
 
@@ -143,7 +154,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                                 case eChainedPuzzleStatus.Solved:
                                     if (!isRecall)
                                     {
-                                        uplinkTerminal.CorruptedUplinkReceiver.m_command.StartTerminalUplinkSequence(string.Empty, true);
+                                        uplinkTerminal.CorruptedUplinkReceiver?.m_command.StartTerminalUplinkSequence(string.Empty, true);
                                         ChangeState(uplinkTerminal, new() { Status = UplinkStatus.InProgress, CurrentRoundIndex = 0 });
                                     }
                                     break;
@@ -201,7 +212,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                             t.m_wardenObjectiveSecurityScanAlign.position,
                             t.m_wardenObjectiveSecurityScanAlign);
 
-                        builtRoundPuzzles.Add(roundOverride);
+                        _builtRoundPuzzles.Add(roundOverride);
                     }
                     else
                     {
@@ -254,7 +265,7 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
             }
 
             var replicator = StateReplicator<UplinkState>.Create(replicatorID, new() { Status = UplinkStatus.Unfinished }, LifeTimeType.Session);
-            replicator.OnStateChanged += (oldState, newState, isRecall) =>
+            replicator!.OnStateChanged += (oldState, newState, isRecall) =>
             {
                 if (oldState.Status == newState.Status) return;
                 EOSLogger.Log($"Uplink - OnStateChanged: {oldState.Status} -> {newState.Status}");
@@ -281,13 +292,13 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                 }
             };
 
-            stateReplicators[uplinkTerminal.Pointer] = replicator;
+            _stateReplicators[uplinkTerminal.Pointer] = replicator;
             EOSLogger.Debug($"BuildUplink: Replicator created");
         }
 
         internal void ChangeState(LG_ComputerTerminal terminal, UplinkState newState)
         {
-            if (!stateReplicators.ContainsKey(terminal.Pointer))
+            if (!_stateReplicators.ContainsKey(terminal.Pointer))
             {
                 EOSLogger.Error($"{terminal.ItemKey} doesn't have a registered StateReplicator!");
                 return;
@@ -295,32 +306,8 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 
             if(SNet.IsMaster)
             {
-                stateReplicators[terminal.Pointer].SetState(newState);
+                _stateReplicators[terminal.Pointer].SetState(newState);
             }
-        }
-
-        private void OnBuildDone()
-        {
-            if (!definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
-            if (UplinkAddrLogContentBlock == null)
-            {
-                UplinkAddrLogContentBlock = GameDataBlockBase<TextDataBlock>.GetBlock("InGame.UplinkTerminal.UplinkAddrLog");
-            }
-            definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(Build);
-        }
-
-        private void Clear()
-        {
-            builtRoundPuzzles.ForEach(r => { r.ChainedPuzzleToEndRoundInstance = null!; } );
-            builtRoundPuzzles.Clear();
-            stateReplicators.Clear();
-        }
-
-        private UplinkObjectiveManager() : base() 
-        {
-            LevelAPI.OnBuildDone += OnBuildDone;
-            LevelAPI.OnLevelCleanup += Clear;
-            LevelAPI.OnBuildStart += Clear;
         }
     }
 }

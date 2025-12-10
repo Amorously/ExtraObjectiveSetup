@@ -1,6 +1,7 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
-using ExtraObjectiveSetup.Utils;
 using GameData;
+using GTFO.API.Extensions;
+using GTFO.API.Utilities;
 using Player;
 using System.Collections;
 using System.Collections.Immutable;
@@ -52,6 +53,9 @@ namespace ExtraObjectiveSetup.ExtendedWardenEvents
             return true;
         }
 
+        public static void ExecuteWardenEvents(List<WardenObjectiveEventData> events)
+            => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(events.ToIl2Cpp(), eWardenObjectiveEventTrigger.None, ignoreTrigger: true);
+
         internal void ExecuteEvent(WardenObjectiveEventData e, float currentDuration)
         {
             uint eventID = (uint)e.Type;
@@ -101,7 +105,7 @@ namespace ExtraObjectiveSetup.ExtendedWardenEvents
                 }
             }
 
-            eventDefinition[eventID]?.Invoke(e);
+            SafeInvoke.Invoke(eventDefinition[eventID], e);
         }
     }
 }

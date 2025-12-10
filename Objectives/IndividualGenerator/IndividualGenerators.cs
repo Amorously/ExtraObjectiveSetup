@@ -1,5 +1,4 @@
 ﻿using ExtraObjectiveSetup.BaseClasses;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 
 namespace ExtraObjectiveSetup.Objectives.IndividualGenerator

@@ -1,6 +1,4 @@
-﻿using ExtraObjectiveSetup.ExtendedWardenEvents;
-using ExtraObjectiveSetup.Utils;
-using GameData;
+﻿using GameData;
 using HarmonyLib;
 
 namespace ExtraObjectiveSetup.Patches
@@ -9,17 +7,15 @@ namespace ExtraObjectiveSetup.Patches
     internal class Patch_CheckAndExecuteEventsOnTrigger
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(WardenObjectiveManager), nameof(WardenObjectiveManager.CheckAndExecuteEventsOnTrigger), new System.Type[] {
+        [HarmonyPatch(typeof(WardenObjectiveManager), nameof(WardenObjectiveManager.CheckAndExecuteEventsOnTrigger), new Type[] 
+        {
             typeof(WardenObjectiveEventData),
             typeof(eWardenObjectiveEventTrigger),
             typeof(bool),
             typeof(float)
         })]
         [HarmonyWrapSafe]
-        private static bool Pre_CheckAndExecuteEventsOnTrigger(WardenObjectiveEventData eventToTrigger,
-            eWardenObjectiveEventTrigger trigger,
-            bool ignoreTrigger,
-            float currentDuration)
+        private static bool Pre_CheckAndExecuteEventsOnTrigger(WardenObjectiveEventData eventToTrigger, eWardenObjectiveEventTrigger trigger, bool ignoreTrigger, float currentDuration)
         {
             if (eventToTrigger == null || !ignoreTrigger && eventToTrigger.Trigger != trigger || currentDuration != 0.0 && eventToTrigger.Delay <= currentDuration)
                 return true;

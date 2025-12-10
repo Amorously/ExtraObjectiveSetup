@@ -6,11 +6,11 @@ using Localization;
 
 namespace ExtraObjectiveSetup.Patches.Uplink
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkSequenceOutputs))]
     internal static class TerminalUplinkSequenceOutput
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkSequenceOutputs))]
+        [HarmonyWrapSafe]
         private static bool Pre_LG_ComputerTerminalCommandInterpreter_TerminalUplinkSequenceOutputs(LG_ComputerTerminal terminal, bool corrupted)
         {
             if (terminal.m_isWardenObjective) return true; // vanilla uplink

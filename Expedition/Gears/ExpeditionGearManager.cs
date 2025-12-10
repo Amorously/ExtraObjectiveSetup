@@ -1,23 +1,28 @@
-﻿using ExtraObjectiveSetup.Utils;
+﻿using ExtraObjectiveSetup.BaseClasses;
+using ExtraObjectiveSetup.Utils;
 using Gear;
 using Player;
 using System.Collections.Immutable;
 
 namespace ExtraObjectiveSetup.Expedition.Gears
 {
-    public class ExpeditionGearManager
+    public sealed class ExpeditionGearManager : BaseManager
     {
-        public static ExpeditionGearManager Current { get; private set; } = new();
-        public GearManager VanillaGearManager { internal set; get; } = null!; // setup in patch: GearManager.LoadOfflineGearDatas
-        private Mode mode = Mode.DISALLOW;
-        private HashSet<uint> GearIds = new();
+        protected override string DEFINITION_NAME => string.Empty;
 
-        public readonly IList<(InventorySlot inventorySlot, Dictionary<uint, GearIDRange> loadedGears)> GearSlots = new List<(InventorySlot, Dictionary<uint, GearIDRange>)>() {
+        public static ExpeditionGearManager Current { get; private set; } = new();
+        public GearManager VanillaGearManager { internal set; get; } = null!; // setup in patch: GearManager.LoadOfflineGearDatas        
+
+        public readonly IList<(InventorySlot inventorySlot, Dictionary<uint, GearIDRange> loadedGears)> GearSlots = new List<(InventorySlot, Dictionary<uint, GearIDRange>)>() 
+        {
             (InventorySlot.GearStandard, new()),
             (InventorySlot.GearSpecial, new()),
             (InventorySlot.GearMelee, new()),
             (InventorySlot.GearClass, new()),
         }.ToImmutableList();
+        
+        private Mode mode = Mode.DISALLOW;
+        private HashSet<uint> GearIds = new();
 
         private void ClearLoadedGears()
         {
@@ -41,14 +46,14 @@ namespace ExtraObjectiveSetup.Expedition.Gears
 
         private void AddGearForCurrentExpedition()
         {
-            foreach (var slot in GearSlots)
+            foreach (var (inventorySlot, loadedGears) in GearSlots)
             {
-                var vanillaSlot = VanillaGearManager.m_gearPerSlot[(int)slot.inventorySlot];
-                var loadedGearsInCategory = slot.loadedGears;
+                var vanillaSlot = VanillaGearManager.m_gearPerSlot[(int)inventorySlot];
+                var loadedGearsInCategory = loadedGears;
 
                 if (loadedGearsInCategory.Count == 0)
                 {
-                    EOSLogger.Debug($"No gear has been loaded for {slot.inventorySlot}.");
+                    EOSLogger.Debug($"No gear has been loaded for {inventorySlot}.");
                     continue;
                 }
 
@@ -62,7 +67,7 @@ namespace ExtraObjectiveSetup.Expedition.Gears
 
                 if (vanillaSlot.Count == 0)
                 {
-                    EOSLogger.Error($"No gear is allowed for {slot.inventorySlot}, there must be at least 1 allowed gear!");
+                    EOSLogger.Error($"No gear is allowed for {inventorySlot}, there must be at least 1 allowed gear!");
                     vanillaSlot.Add(loadedGearsInCategory.First().Value);
                 }
             }
@@ -96,7 +101,7 @@ namespace ExtraObjectiveSetup.Expedition.Gears
             mode = Mode.DISALLOW;
             GearIds.Clear();
 
-            var expDef = ExpeditionDefinitionManager.Current.GetDefinition(ExpeditionDefinitionManager.Current.CurrentMainLevelLayout);
+            var expDef = ExpeditionDefinitionManager.Current.GetDefinition(CurrentMainLevelLayout);
             if (expDef == null || expDef.ExpeditionGears == null) 
             {
                 return;
@@ -113,8 +118,6 @@ namespace ExtraObjectiveSetup.Expedition.Gears
             AddGearForCurrentExpedition();
             ResetPlayerSelectedGears();
         }
-
-        public void Init() { }
 
         public static uint GetOfflineGearPID(GearIDRange gearIDRange)
         {

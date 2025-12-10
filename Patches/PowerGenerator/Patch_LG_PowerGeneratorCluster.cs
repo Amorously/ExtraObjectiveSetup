@@ -1,16 +1,14 @@
 ﻿using ExtraObjectiveSetup.Instances;
 using ExtraObjectiveSetup.Objectives.GeneratorCluster;
-using ExtraObjectiveSetup.Utils;
 using HarmonyLib;
 using LevelGeneration;
 using UnityEngine;
 
 namespace ExtraObjectiveSetup.Patches.PowerGenerator
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LG_PowerGeneratorCluster), nameof(LG_PowerGeneratorCluster.Setup))]
     internal static class Patch_LG_PowerGeneratorCluster
     {        
-        [HarmonyPatch(typeof(LG_PowerGeneratorCluster), nameof(LG_PowerGeneratorCluster.Setup))]
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         private static void Post_PowerGeneratorCluster_Setup(LG_PowerGeneratorCluster __instance)

@@ -1,5 +1,4 @@
 ﻿using AmorLib.Networking.StateReplicators;
-using ExtraObjectiveSetup.Utils;
 using LevelGeneration;
 using Player;
 using SNetwork;
@@ -14,7 +13,7 @@ namespace ExtraObjectiveSetup.Tweaks.TerminalTweak
 
         private void ChangeStateUnsynced(bool enabled)
         {
-            EOSLogger.Debug($"{lgTerminal.ItemKey} state, enabled: {enabled}");
+            //EOSLogger.Debug($"{lgTerminal.ItemKey} state, enabled: {enabled}");
 
             lgTerminal.OnProximityExit();
             Interact_ComputerTerminal interact = lgTerminal.GetComponentInChildren<Interact_ComputerTerminal>(true);
@@ -26,16 +25,8 @@ namespace ExtraObjectiveSetup.Tweaks.TerminalTweak
                 interact.SetActive(active);
             }
 
-            //GUIX_VirtualSceneLink vsl = lgTerminal.GetComponent<GUIX_VirtualSceneLink>();
-            //if (vsl != null && vsl.m_virtualScene != null)
-            //{
-            //    GUIX_VirtualCamera virtualCamera = vsl.m_virtualScene.virtualCamera;
-            //    virtualCamera.SetFovAndClip(virtualCamera.paramCamera.fieldOfView, active ? 0.3f : 0.0f, active ? 1000f : 0.0f);
-            //}
-
             lgTerminal.m_interfaceScreen.SetActive(active);
             lgTerminal.m_loginScreen.SetActive(active);
-            //lgTerminal.m_screen.SetActive(active); // don't use
 
             if (lgTerminal.m_text != null)
             {

@@ -1,6 +1,5 @@
 ﻿using Enemies;
 using ExtraObjectiveSetup.Tweaks.BossEvents;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
 using HarmonyLib;

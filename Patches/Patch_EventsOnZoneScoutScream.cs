@@ -1,18 +1,15 @@
 ﻿using Enemies;
 using ExtraObjectiveSetup.Tweaks.Scout;
-using ExtraObjectiveSetup.Utils;
 using GameData;
 using HarmonyLib;
 using SNetwork;
 
 namespace ExtraObjectiveSetup.Patches
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ES_ScoutScream), nameof(ES_ScoutScream.CommonUpdate))]
     class Patch_EventsOnZoneScoutScream
     {        
-        [HarmonyPatch(typeof(ES_ScoutScream), nameof(ES_ScoutScream.CommonUpdate))]
         [HarmonyPrefix]
-        [HarmonyWrapSafe]
         private static bool Pre_ES_ScoutScream_CommonUpdate(ES_ScoutScream __instance)
         {
             var enemyAgent = __instance.m_enemyAgent;
@@ -25,7 +22,7 @@ namespace ExtraObjectiveSetup.Patches
 
             if (def.EventsOnScoutScream != null && def.EventsOnScoutScream.Count > 0)
             {
-                EOSLogger.Debug($"EventsOnZoneScoutScream: found config for {def.GlobalZoneIndexTuple()}, executing events.");
+                EOSLogger.Debug($"EventsOnZoneScoutScream: found config for {def}, executing events.");
                 def.EventsOnScoutScream.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
             }
 

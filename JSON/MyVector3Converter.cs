@@ -1,5 +1,4 @@
-﻿using ExtraObjectiveSetup.Utils;
-using GTFO.API.Utilities;
+﻿using GTFO.API.Utilities;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;

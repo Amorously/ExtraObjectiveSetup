@@ -2,7 +2,7 @@
 
 namespace ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition
 {
-    public class CustomTerminalZoneSelectionData : GlobalZoneIndex
+    public class CustomTerminalZoneSelectionData : GlobalBased
     {
         public eSeedType SeedType { set; get; } = eSeedType.SessionSeed;
 

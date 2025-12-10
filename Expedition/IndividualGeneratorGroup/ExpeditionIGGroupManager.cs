@@ -1,21 +1,48 @@
 ﻿using AK;
+using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Instances;
-using ExtraObjectiveSetup.Utils;
-using GTFO.API;
 using LevelGeneration;
+using System.Collections;
 
 namespace ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup
 {
-    internal class ExpeditionIGGroupManager
+    internal sealed class ExpeditionIGGroupManager : BaseManager
     {
+        protected override string DEFINITION_NAME => string.Empty;
+
         public static ExpeditionIGGroupManager Current { get; private set; } = new();
 
-        private List<(HashSet<IntPtr> group, ExpeditionIGGroup groupDef)> generatorGroups = new();
+        private readonly List<(HashSet<IntPtr> group, ExpeditionIGGroup groupDef)> generatorGroups = new();
+
+        protected override void OnBuildStart() => OnLevelCleanup();
+
+        protected override void OnBuildDone() // BuildIGGroupsLogic
+        {
+            var expDef = ExpeditionDefinitionManager.Current.GetDefinition(CurrentMainLevelLayout);
+            if (expDef == null || expDef.GeneratorGroups == null || expDef.GeneratorGroups.Count < 1) return;
+
+            foreach(var generatorGroup in expDef.GeneratorGroups)
+            {
+                var generators = GatherIGs(generatorGroup);
+                generatorGroups.Add((generators.ConvertAll(new Converter<LG_PowerGenerator_Core, IntPtr>(core => core.Pointer)).ToHashSet(), generatorGroup));
+            }
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            foreach (var generatorGroup in generatorGroups)
+            {
+                generatorGroup.groupDef.GeneratorInstances.Clear();
+            }
+
+            generatorGroups.Clear();
+        }
 
         private List<LG_PowerGenerator_Core> GatherIGs(ExpeditionIGGroup IGGroup)
         {
             List<LG_PowerGenerator_Core> result = new();
-            IGGroup.Generators.ForEach(index => {
+            IGGroup.Generators.ForEach(index => 
+            {
                 var instance = PowerGeneratorInstanceManager.Current.GetInstance(index.GlobalZoneIndexTuple(), index.InstanceIndex);
                 if(instance == null)
                 {
@@ -33,17 +60,17 @@ namespace ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup
 
         public ExpeditionIGGroup FindGroupDefOf(LG_PowerGenerator_Core core)
         {
-            foreach(var generatorGroup in generatorGroups)
+            foreach(var (group, groupDef) in generatorGroups)
             {
-                if(generatorGroup.group.Contains(core.Pointer))
+                if(group.Contains(core.Pointer))
                 {
-                    return generatorGroup.groupDef;
+                    return groupDef;
                 }
             }
             return null!;
         }
 
-        internal static System.Collections.IEnumerator PlayGroupEndSequence(ExpeditionIGGroup IGGroup)
+        internal static IEnumerator PlayGroupEndSequence(ExpeditionIGGroup IGGroup)
         {
             yield return new UnityEngine.WaitForSeconds(4f);
 
@@ -67,37 +94,6 @@ namespace ExtraObjectiveSetup.Expedition.IndividualGeneratorGroup
             {
                 IGGroup.EventsOnInsertCell[eventIndex].ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, GameData.eWardenObjectiveEventTrigger.None, true));
             }
-        }
-
-        internal void BuildIGGroupsLogic()
-        {
-            var expDef = ExpeditionDefinitionManager.Current.GetDefinition(ExpeditionDefinitionManager.Current.CurrentMainLevelLayout);
-            if (expDef == null || expDef.GeneratorGroups == null || expDef.GeneratorGroups.Count < 1) return;
-
-            foreach(var generatorGroup in expDef.GeneratorGroups)
-            {
-                var generators = GatherIGs(generatorGroup);
-                generatorGroups.Add((generators.ConvertAll(new Converter<LG_PowerGenerator_Core, IntPtr>(core => core.Pointer)).ToHashSet(), generatorGroup));
-            }
-        }
-
-        public void Init() { }
-
-        private void Clear()
-        {
-            foreach (var generatorGroup in generatorGroups)
-            {
-                generatorGroup.groupDef.GeneratorInstances.Clear();
-            }
-
-            generatorGroups.Clear();
-        }
-
-        private ExpeditionIGGroupManager() 
-        {
-            LevelAPI.OnBuildDone += BuildIGGroupsLogic;
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
         }
     }
 }

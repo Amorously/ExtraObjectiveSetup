@@ -1,8 +1,6 @@
 ﻿using ChainedPuzzles;
 using ExtraObjectiveSetup.BaseClasses;
-using ExtraObjectiveSetup.Utils;
 using GameData;
-using GTFO.API;
 using LevelGeneration;
 using pCPState = ChainedPuzzles.pChainedPuzzleState;
 
@@ -13,6 +11,18 @@ namespace ExtraObjectiveSetup.Instances.ChainedPuzzle
         public static ChainedPuzzleInstanceManager Current { get; } = new();
 
         private Dictionary<IntPtr, Action<pCPState, pCPState, bool>> Puzzles_OnStateChange { get; } = new();
+
+        protected override void OnBuildStart()
+        {
+            OnLevelCleanup();
+            base.OnBuildStart();
+        }
+
+        protected override void OnLevelCleanup()
+        {
+            Puzzles_OnStateChange.Clear();
+            base.OnLevelCleanup();
+        }
 
         public override (eDimensionIndex dim, LG_LayerType layer, eLocalZoneIndex zone) GetGlobalZoneIndex(ChainedPuzzleInstance instance)
         {
@@ -63,17 +73,6 @@ namespace ExtraObjectiveSetup.Instances.ChainedPuzzle
 
         public Action<pCPState, pCPState, bool> Get_OnStateChange(ChainedPuzzleInstance instance) => Get_OnStateChange(instance.Pointer);
 
-        public Action<pCPState, pCPState, bool> Get_OnStateChange(IntPtr pointer) => Puzzles_OnStateChange.TryGetValue(pointer, out var actions) ? actions : null;
-
-        private void Clear()
-        {
-            Puzzles_OnStateChange.Clear();
-        }
-
-        private ChainedPuzzleInstanceManager()
-        {
-            LevelAPI.OnBuildStart += Clear;
-            LevelAPI.OnLevelCleanup += Clear;
-        }
+        public Action<pCPState, pCPState, bool> Get_OnStateChange(IntPtr pointer) => Puzzles_OnStateChange.TryGetValue(pointer, out var actions) ? actions : null!;
     }
 }
