@@ -6,6 +6,7 @@ namespace ExtraObjectiveSetup.BaseClasses
     public abstract class GenericDefinitionManager<T> : BaseManager where T: new()
     {
         protected Dictionary<uint, GenericDefinition<T>> Definitions { get; set; } = new();
+        protected Dictionary<uint, GenericDefinition<T>> definitions { get => Definitions; set => Definitions = value; }
 
         protected override void ReadFiles()
         {
@@ -19,9 +20,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             }
         }
 
-        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
-
-        protected virtual void FileChanged(LiveEditEventArgs e)
+        protected override void FileChanged(LiveEditEventArgs e)
         {
             EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>

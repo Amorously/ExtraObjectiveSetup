@@ -13,20 +13,19 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 
         public ObjectiveCounterManager() 
         {
-            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);               
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, EventDefinition);
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.SetCounter.ToString(), (uint)CounterWardenEvent.SetCounter, EventDefinition);
         }
-        
-        protected override void OnBuildStart() => Clear();
-        protected override void OnBuildDone() => BuildCounters();   
-        protected override void OnLevelCleanup() => Clear();
 
-        private void BuildCounters()
+        protected override void OnBuildStart() => OnLevelCleanup();
+
+        protected override void OnBuildDone() // BuildCounters
         {
             if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return;
             Definitions[CurrentMainLevelLayout].Definitions.ForEach(Build);
         }
 
-        private void Clear()
+        protected override void OnLevelCleanup()
         {
             _counters.Clear();
         }
@@ -50,32 +49,34 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
             EOSLogger.Debug($"Build Counter: counter '{def.WorldEventObjectFilter}' setup completed");
         }
 
-        public void ChangeCounter(string worldEventObjectFilter, int by)
+        private void ChangeCounter(WardenObjectiveEventData e)
         {
-            if(!_counters.ContainsKey(worldEventObjectFilter))
+            if (!_counters.TryGetValue(e.WorldEventObjectFilter, out var counter))
             {
-                EOSLogger.Error($"ChangeCounter: {worldEventObjectFilter} is not defined");
+                EOSLogger.Error($"ChangeCounter: {e.WorldEventObjectFilter} is not defined");
                 return;
             }
-
-            if (by == 0) return;
-
-            var counter = _counters[worldEventObjectFilter];
-            if(by > 0)
+            
+            int by = e.Count;
+            if (by > 0)
             {
                 counter.Increment(by);
             }
-            else
+            else if (by < 0)
             {
-                counter.Decrement(-by);
+                counter.Decrement(by);
             }
+
         }
 
-        private void ChangeCounter(WardenObjectiveEventData e)
+        private void SetCounter(WardenObjectiveEventData e)
         {
-            string worldEventObjectFilter = e.WorldEventObjectFilter;
-            int by = e.Count;
-            ChangeCounter(worldEventObjectFilter, by);
+            if (!_counters.TryGetValue(e.WorldEventObjectFilter, out var counter))
+            {
+                EOSLogger.Error($"ChangeCounter: {e.WorldEventObjectFilter} is not defined");
+                return;
+            }
+            counter.Set(e.Count);
         }
     }
 }

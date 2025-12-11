@@ -9,6 +9,7 @@ namespace ExtraObjectiveSetup.BaseClasses
         public const int APPLY_TO_ALL_RUNDOWN_ID = 0;
 
         protected Dictionary<int, RundownWiseDefinition<T>> Definitions { get; set; } = new();
+        protected Dictionary<int, RundownWiseDefinition<T>> definitions { get => Definitions; set => Definitions = value; }
 
         protected override void ReadFiles()
         {
@@ -22,9 +23,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             }
         }
 
-        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
-
-        protected virtual void FileChanged(LiveEditEventArgs e)
+        protected override void FileChanged(LiveEditEventArgs e)
         {
             EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>

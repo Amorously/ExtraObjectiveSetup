@@ -24,7 +24,7 @@ namespace ExtraObjectiveSetup.Expedition
             }
         }
 
-        protected override void OnFileChanged(LiveEditEventArgs e) 
+        protected override void FileChanged(LiveEditEventArgs e) 
         {
             EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>

@@ -1,79 +1,86 @@
 ﻿using AmorLib.Networking.StateReplicators;
-using GTFO.API.Extensions;
 
 namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 {
     public struct CounterStatus
     {
-        public int Count = 0;
-
-        public CounterStatus() { }
+        public int count;
     }
 
     public class Counter
     {
-        public ObjectiveCounterDefinition def { get; private set; }
+        public ObjectiveCounterDefinition Def { get; private set; }
+        public int CurrentCount { get; private set; } = 0;        
+        public string WorldEventObjectFilter => Def.WorldEventObjectFilter;
+        public StateReplicator<CounterStatus>? StateReplicator { get; private set; }
 
-        public string WorldEventObjectFilter => def.WorldEventObjectFilter;
-
-        public int CurrentCount => StateReplicator?.State.Count ?? 0;
-
-        public StateReplicator<CounterStatus> StateReplicator { get; private set; }
-
-        private void OnStateChanged(CounterStatus oldStatus, CounterStatus newStatus, bool isRecall)
+        private readonly HashSet<OnCounter> _executedOnce = new(); 
+        
+        public Counter(ObjectiveCounterDefinition def)
         {
-            // currently have nothing to do here
-        }
-
-        private void ReachTo(int count)
-        {
-            def.OnReached
-                .FindAll(Counter => Counter.Count == count)
-                .ForEach(Counter =>
-                WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Counter.EventsOnReached.ToIl2Cpp(), GameData.eWardenObjectiveEventTrigger.None, true));
-
-            EOSLogger.Debug($"Counter '{WorldEventObjectFilter}' reached to {count}");
-        }
-
-        public void Increment(int by)
-        {
-            if (by <= 0) return;
-
-            int target = CurrentCount + by;
-            for(int count = CurrentCount + 1; count <= target; count++)
-            {
-                ReachTo(count);
-            }
-
-            StateReplicator.SetStateUnsynced(new() { Count = target });
-        }
-
-        public void Decrement(int by)
-        {
-            if (by <= 0) return;
-
-            int target = CurrentCount - by;
-            for (int count = CurrentCount - 1; count >= target; count--)
-            {
-                ReachTo(count);
-            }
-
-            StateReplicator.SetStateUnsynced(new() { Count = target });
+            Def = def;
+            CurrentCount = def.StartingCount;
         }
 
         internal bool TrySetupReplicator()
         {
             uint id = EOSNetworking.AllotReplicatorID();
-            if(id == EOSNetworking.INVALID_ID) return false;
+            if (id == EOSNetworking.INVALID_ID) return false;
 
-            StateReplicator = StateReplicator<CounterStatus>.Create(id, new() { Count = def.StartingCount }, LifeTimeType.Session)!;
+            StateReplicator = StateReplicator<CounterStatus>.Create(id, new() { count = Def.StartingCount }, LifeTimeType.Session)!;
             StateReplicator.OnStateChanged += OnStateChanged;
             return true;
         }
 
-        public Counter(ObjectiveCounterDefinition def) 
+        private void OnStateChanged(CounterStatus _, CounterStatus state, bool isRecall)
         {
-            this.def = def;
+            if (state.count != CurrentCount)
+            {
+                CurrentCount = state.count;
+            }
+        }
+
+        private void ReachTo(int count)
+        {
+            var counters = Def.OnReached.Where(c => c.Count == count);
+            foreach (var counter in counters)
+            {
+                if (counter.ExecuteOnce && _executedOnce.Contains(counter)) continue;
+                EOSWardenEventManager.ExecuteWardenEvents(counter.EventsOnReached);
+
+                if (counter.ExecuteOnce)
+                    _executedOnce.Add(counter);
+            }
+            EOSLogger.Debug($"Counter '{WorldEventObjectFilter}' reached {count}");
+        }
+
+        public void Increment(int by)
+        {
+            int prev = CurrentCount;
+            CurrentCount += by;
+
+            for (int num = prev + 1; num <= CurrentCount; num++)
+                ReachTo(num);
+
+            StateReplicator?.SetStateUnsynced(new() { count = CurrentCount });
+        }
+
+        public void Decrement(int by)
+        {
+            int prev = CurrentCount;
+            CurrentCount -= by;
+
+            for (int num = prev - 1; num >= CurrentCount; num--)
+                ReachTo(num);
+
+            StateReplicator?.SetStateUnsynced(new() { count = CurrentCount });
+        }
+
+        public void Set(int num)
+        {
+            CurrentCount = num;
+            ReachTo(num);
+            StateReplicator?.SetStateUnsynced(new() { count = CurrentCount });
         }
     }
 }

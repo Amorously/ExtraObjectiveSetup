@@ -50,11 +50,11 @@ namespace ExtraObjectiveSetup.BaseClasses
             ReadFiles();
 
             _liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
-            _liveEditListener.FileChanged += OnFileChanged;
+            _liveEditListener.FileChanged += FileChanged;
         }
 
         protected virtual void ReadFiles() { }
-        protected virtual void OnFileChanged(LiveEditEventArgs e) { }
+        protected virtual void FileChanged(LiveEditEventArgs e) { }
         protected virtual void OnBuildStart() { }
         protected virtual void OnBuildDone() { }
         protected virtual void OnEnterLevel() { }

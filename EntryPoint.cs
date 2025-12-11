@@ -47,7 +47,7 @@ namespace ExtraObjectiveSetup
             var managers = _callbackAssemblyTypes
                 .SelectMany(types => types)
                 .Where(t => typeof(BaseManager).IsAssignableFrom(t) && !t.IsAbstract)
-                .Select(t => (BaseManager)Activator.CreateInstance(t)!);
+                .Select(t => (BaseManager)Activator.CreateInstance(t, true)!);
             BaseManager.SetupManagers(managers);
         }
     }

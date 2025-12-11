@@ -11,6 +11,8 @@ namespace ExtraObjectiveSetup.BaseClasses
         
         protected Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), Dictionary<IntPtr, uint>> Instances2Index { get; set; } = new();
         protected Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), List<T>> Index2Instance { get; set; } = new();
+        protected Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), Dictionary<IntPtr, uint>> instances2Index { get => Instances2Index; set => Instances2Index = value; }
+        protected Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), List<T>> index2Instance { get => Index2Instance; set => Index2Instance = value; }
 
         protected override void OnBuildStart() => OnLevelCleanup();
 

@@ -25,9 +25,9 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
 
         protected override void OnBuildDone()
         {
-            if (!Definitions.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
+            if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return;
             UplinkAddrLogContentBlock ??= GameDataBlockBase<TextDataBlock>.GetBlock("InGame.UplinkTerminal.UplinkAddrLog");
-            Definitions[RundownManager.ActiveExpedition.LevelLayoutData].Definitions.ForEach(Build);
+            Definitions[CurrentMainLevelLayout].Definitions.ForEach(Build);
         }
 
         protected override void OnLevelCleanup()
@@ -88,13 +88,15 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                 def.EventsOnComplete?.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
             });
 
-            uplinkTerminal.m_command.AddCommand(
+            uplinkTerminal.m_command.AddCommand
+            (
                 uplinkTerminal.CorruptedUplinkReceiver == null ? TERM_Command.TerminalUplinkConnect : TERM_Command.TerminalCorruptedUplinkConnect, 
-                def.UseUplinkAddress ? "UPLINK_CONNECT" : "UPLINK_ESTABLISH", 
-                new LocalizedText() {
-                UntranslatedText = Text.Get(3914968919),
-                Id = 3914968919
-                });
+                def.UseUplinkAddress ? "UPLINK_CONNECT" : "UPLINK_ESTABLISH", new LocalizedText() 
+                {
+                    UntranslatedText = Text.Get(3914968919),
+                    Id = 3914968919
+                }
+            );
 
             uplinkTerminal.m_command.AddCommand(TERM_Command.TerminalUplinkVerify, "UPLINK_VERIFY", new LocalizedText()
             {
@@ -138,11 +140,13 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                 }
                 else
                 {
-                    uplinkTerminal.m_chainPuzzleForWardenObjective = ChainedPuzzleManager.CreatePuzzleInstance(
+                    uplinkTerminal.m_chainPuzzleForWardenObjective = ChainedPuzzleManager.CreatePuzzleInstance
+                    (
                         block,
                         uplinkTerminal.SpawnNode.m_area,
                         uplinkTerminal.m_wardenObjectiveSecurityScanAlign.position,
-                        uplinkTerminal.m_wardenObjectiveSecurityScanAlign);
+                        uplinkTerminal.m_wardenObjectiveSecurityScanAlign
+                    );
 
                     if(def.SetupAsCorruptedUplink)
                     {
@@ -206,11 +210,13 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
                             default: EOSLogger.Error($"Unimplemented enum UplinkTerminal type {roundOverride.BuildChainedPuzzleOn}"); continue;
                         }
 
-                        roundOverride.ChainedPuzzleToEndRoundInstance = ChainedPuzzleManager.CreatePuzzleInstance(
+                        roundOverride.ChainedPuzzleToEndRoundInstance = ChainedPuzzleManager.CreatePuzzleInstance
+                        (
                             block,
                             t.SpawnNode.m_area,
                             t.m_wardenObjectiveSecurityScanAlign.position,
-                            t.m_wardenObjectiveSecurityScanAlign);
+                            t.m_wardenObjectiveSecurityScanAlign
+                        );
 
                         _builtRoundPuzzles.Add(roundOverride);
                     }

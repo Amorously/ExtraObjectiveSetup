@@ -1,4 +1,5 @@
-﻿using ExtraObjectiveSetup.JSON;
+﻿using AmorLib.Utils;
+using ExtraObjectiveSetup.JSON;
 using GameData;
 using GTFO.API.Utilities;
 using LevelGeneration;
@@ -8,6 +9,7 @@ namespace ExtraObjectiveSetup.BaseClasses
     public abstract class InstanceDefinitionManager<T> : BaseManager where T : BaseInstanceDefinition, new()
     { 
         protected Dictionary<uint, InstanceDefinitionsForLevel<T>> Definitions { get; set; } = new();
+        protected Dictionary<uint, InstanceDefinitionsForLevel<T>> definitions { get => Definitions; set => Definitions = value; }
 
         protected override void ReadFiles()
         {
@@ -33,9 +35,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             Definitions[definitions.MainLevelLayout] = definitions;
         }
 
-        protected override void OnFileChanged(LiveEditEventArgs e) => FileChanged(e);
-
-        protected virtual void FileChanged(LiveEditEventArgs e)
+        protected override void FileChanged(LiveEditEventArgs e)
         {
             EOSLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
@@ -52,20 +52,17 @@ namespace ExtraObjectiveSetup.BaseClasses
         public virtual T GetDefinition(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex)
         {
             if (!Definitions.ContainsKey(CurrentMainLevelLayout)) return null!;
-
-            return Definitions[CurrentMainLevelLayout]
-                .Definitions.Find(def => def.DimensionIndex == dimensionIndex && def.LayerType == layerType && def.LocalIndex == localIndex && def.InstanceIndex == instanceIndex)!;
+            var tuple = GlobalIndexUtil.ToIntTuple(dimensionIndex, layerType, localIndex);
+            return Definitions[CurrentMainLevelLayout].Definitions.Find(def => def.IntTuple == tuple)!;
         }
 
         protected void Sort(InstanceDefinitionsForLevel<T> levelDefs)
         {
             levelDefs.Definitions.Sort((u1, u2) =>
             {
-                if (u1.DimensionIndex != u2.DimensionIndex) return (int)u1.DimensionIndex < (int)u2.DimensionIndex ? -1 : 1;
-                if (u1.LayerType != u2.LayerType) return (int)u1.LayerType < (int)u2.LayerType ? -1 : 1;
-                if (u1.LocalIndex != u2.LocalIndex) return (int)u1.LocalIndex < (int)u2.LocalIndex ? -1 : 1;
-                if (u1.InstanceIndex != u2.InstanceIndex) return u1.InstanceIndex < u2.InstanceIndex ? -1 : -1;
-                return 0;
+                int cmp = u1.IntTuple.CompareTo(u2.IntTuple);
+                if (cmp != 0) return cmp;
+                return u1.InstanceIndex.CompareTo(u2.InstanceIndex);
             });
         }        
     }
