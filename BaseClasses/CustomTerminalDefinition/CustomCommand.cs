@@ -1,7 +1,7 @@
-﻿using GameData;
+﻿using AmorLib.Utils.JsonElementConverters;
+using GameData;
 using GTFO.API.Extensions;
 using LevelGeneration;
-using Localization;
 
 namespace ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition
 {
@@ -9,7 +9,7 @@ namespace ExtraObjectiveSetup.BaseClasses.CustomTerminalDefinition
     {
         public string Command { set; get; } = string.Empty;
 
-        public LocalizedText CommandDesc { set; get; } = null!;
+        public LocaleText CommandDesc { set; get; } = LocaleText.Empty;
 
         public List<TerminalOutput> PostCommandOutputs { set; get; } = new();
 

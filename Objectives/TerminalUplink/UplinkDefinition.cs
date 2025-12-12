@@ -17,7 +17,9 @@ namespace ExtraObjectiveSetup.Objectives.TerminalUplink
     {
         public eDimensionIndex DimensionIndex { get; set; }
 
-        public LG_LayerType LayerType { get; set; }
+        public LG_LayerType Layer { get; set; }
+
+        public LG_LayerType LayerType { get => Layer; set => Layer = value; }
 
         public eLocalZoneIndex LocalIndex { get; set; }
 

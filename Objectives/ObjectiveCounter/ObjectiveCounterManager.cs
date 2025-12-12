@@ -13,8 +13,8 @@ namespace ExtraObjectiveSetup.Objectives.ObjectiveCounter
 
         public ObjectiveCounterManager() 
         {
-            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, EventDefinition);
-            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.SetCounter.ToString(), (uint)CounterWardenEvent.SetCounter, EventDefinition);
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.ChangeCounter.ToString(), (uint)CounterWardenEvent.ChangeCounter, ChangeCounter);
+            EOSWardenEventManager.Current.AddEventDefinition(CounterWardenEvent.SetCounter.ToString(), (uint)CounterWardenEvent.SetCounter, SetCounter);
         }
 
         protected override void OnBuildStart() => OnLevelCleanup();
