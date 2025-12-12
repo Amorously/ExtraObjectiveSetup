@@ -8,9 +8,9 @@ using LevelGeneration;
 namespace ExtraObjectiveSetup.Patches
 {
     [HarmonyPatch]
-    internal class Patch_EventsOnBossDeath
+    internal static class Patch_EventsOnBossDeath
     {
-        private static HashSet<ushort> ExecutedForInstances = new(); 
+        private static readonly HashSet<ushort> _executedForInstances = new(); 
 
         // called on both host and client side
         
@@ -34,19 +34,14 @@ namespace ExtraObjectiveSetup.Patches
             if (!def.BossIDs.Contains(enemy.EnemyData.persistentID)) return;
 
             // TODO: test 
-            if (!(
-                (spawnData.mode == Agents.AgentMode.Hibernate || spawnData.mode == Agents.AgentMode.Scout) 
-                && def.ApplyToHibernate 
-                
-                || 
-
-                spawnData.mode == Agents.AgentMode.Agressive && def.ApplyToWave
-                )) return;
+            bool isHibernate = (spawnData.mode == Agents.AgentMode.Hibernate || spawnData.mode == Agents.AgentMode.Scout) && def.ApplyToHibernate;
+            bool isAggressive = spawnData.mode == Agents.AgentMode.Agressive && def.ApplyToWave;
+            if (!isHibernate && !isAggressive) return;
 
             var mode = spawnData.mode == Agents.AgentMode.Hibernate ? BossDeathEventManager.Mode.HIBERNATE : BossDeathEventManager.Mode.WAVE;
             //BossDeathEventManager.Current.RegisterInLevelBDEventsExecution(def, mode);
 
-            enemy.add_OnDeadCallback(new System.Action(() =>
+            enemy.add_OnDeadCallback(new Action(() =>
             {
                 if (GameStateManager.CurrentStateName != eGameStateName.InLevel) return;
 
@@ -57,14 +52,14 @@ namespace ExtraObjectiveSetup.Patches
                 }
 
                 ushort enemyID = enemy.GlobalID;
-                if (ExecutedForInstances.Contains(enemyID))
+                if (_executedForInstances.Contains(enemyID))
                 {
-                    ExecutedForInstances.Remove(enemyID);
+                    _executedForInstances.Remove(enemyID);
                     return;
                 }
 
                 def.EventsOnBossDeath.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
-                ExecutedForInstances.Add(enemyID);
+                _executedForInstances.Add(enemyID);
             }));
 
             EOSLogger.Debug($"EventsOnBossDeath: added for enemy with id  {enemy.EnemyData.persistentID}, mode: {spawnData.mode}");
@@ -72,7 +67,7 @@ namespace ExtraObjectiveSetup.Patches
 
         static Patch_EventsOnBossDeath()
         {
-            LevelAPI.OnLevelCleanup += ExecutedForInstances.Clear;
+            LevelAPI.OnLevelCleanup += _executedForInstances.Clear;
         }
     }
 }

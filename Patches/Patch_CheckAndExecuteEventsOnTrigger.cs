@@ -14,6 +14,7 @@ namespace ExtraObjectiveSetup.Patches
             typeof(bool),
             typeof(float)
         })]
+        [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyWrapSafe]
         private static bool Pre_CheckAndExecuteEventsOnTrigger(WardenObjectiveEventData eventToTrigger, eWardenObjectiveEventTrigger trigger, bool ignoreTrigger, float currentDuration)
         {

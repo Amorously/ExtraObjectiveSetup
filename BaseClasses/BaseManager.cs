@@ -29,7 +29,7 @@ namespace ExtraObjectiveSetup.BaseClasses
             LevelAPI.OnLevelCleanup += ManagerLevelCleanup;
         }
         
-        private void Init()
+        public void Init()
         {
             if (_initialized) return;
             _initialized = true;
